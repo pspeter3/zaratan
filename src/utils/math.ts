@@ -26,3 +26,13 @@ export const mix = (a: number, b: number, t: number): number =>
  */
 export const clamp = (value: number, min: number, max: number) =>
     Math.max(min, Math.min(max, value));
+
+/**
+ * Calculates the weight of a value between min and max.
+ * @param value The value to weigh
+ * @param min The min value
+ * @param max The max value
+ * @returns The weight
+ */
+export const weigh = (value: number, min: number, max: number): number =>
+    (value - min) / (max - min);

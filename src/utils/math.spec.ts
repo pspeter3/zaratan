@@ -1,4 +1,4 @@
-import { clamp, mix, snap } from "./math";
+import { clamp, mix, snap, weigh } from "./math";
 
 describe("math", () => {
     describe("snap", () => {
@@ -41,5 +41,11 @@ describe("math", () => {
         it("should return value when in bounds", () => {
             expect(clamp(0.5, 0, 1)).toBe(0.5);
         });
-    })
+    });
+
+    describe("weigh", () => {
+        it("should calculate the weight", () => {
+            expect(weigh(2, 0, 4)).toBe(0.5);
+        });
+    });
 });
