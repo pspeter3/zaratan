@@ -19,4 +19,4 @@ export const float53 = (value: number): number => value / UINT32_MAX;
  * @param bits
  */
 export const rotateBits = (value: number, bits: number): number =>
-  (value << bits) | (value >>> (UINT32_SIZE - bits));
+    (value << bits) | (value >>> (UINT32_SIZE - bits));
