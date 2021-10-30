@@ -102,4 +102,12 @@ export class Bounds {
             vector.y <= this.yMax
         );
     }
+
+    /**
+     * Computes the center of the bounds.
+     * @returns The center
+     */
+    center(): Vector {
+        return this.origin.add(this.size.scale(0.5));
+    }
 }

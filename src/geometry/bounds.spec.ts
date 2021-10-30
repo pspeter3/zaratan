@@ -73,4 +73,13 @@ describe("Bounds", () => {
             expect(bounds.contains(new Vector(-1, 1))).toBe(false);
         });
     });
+
+    describe("center", () => {
+        it("should return the center of the bounds", () => {
+            expect(Bounds.fromSize(new Vector(2, 2)).center()).toEqual({
+                x: 1,
+                y: 1,
+            });
+        });
+    });
 });
