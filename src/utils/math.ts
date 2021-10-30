@@ -14,7 +14,7 @@ export const snap = (value: number): number =>
  * @param t The weight
  * @returns The interpolated value.
  */
-export const lerp = (a: number, b: number, t: number): number =>
+export const mix = (a: number, b: number, t: number): number =>
     a * (1 - t) + b * t;
 
 /**

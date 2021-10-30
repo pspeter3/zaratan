@@ -1,4 +1,4 @@
-import { clamp, lerp, snap } from "./math";
+import { clamp, mix, snap } from "./math";
 
 describe("math", () => {
     describe("snap", () => {
@@ -15,17 +15,17 @@ describe("math", () => {
         });
     });
 
-    describe("lerp", () => {
+    describe("mix", () => {
         it("should return a when t is 0", () => {
-            expect(lerp(1.1, 2.1, 0)).toBe(1.1);
+            expect(mix(1.1, 2.1, 0)).toBe(1.1);
         });
 
         it("should return b when t is 0", () => {
-            expect(lerp(1.1, 2.1, 1)).toBe(2.1);
+            expect(mix(1.1, 2.1, 1)).toBe(2.1);
         });
 
         it("should return the midpoint when t is 0.5", () => {
-            expect(lerp(1.1, 2.1, 0.5)).toBe(1.6);
+            expect(mix(1.1, 2.1, 0.5)).toBe(1.6);
         });
     });
 
