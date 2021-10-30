@@ -1,4 +1,4 @@
-import { lerp, snap } from "./math";
+import { clamp, lerp, snap } from "./math";
 
 describe("math", () => {
     describe("snap", () => {
@@ -28,4 +28,18 @@ describe("math", () => {
             expect(lerp(1.1, 2.1, 0.5)).toBe(1.6);
         });
     });
+
+    describe("clamp", () => {
+        it("should return min when value is less than min", () => {
+            expect(clamp(-1, 0, 1)).toBe(0);
+        });
+
+        it("should return max when value is greater than max", () => {
+            expect(clamp(2, 0, 1)).toBe(1);
+        });
+
+        it("should return value when in bounds", () => {
+            expect(clamp(0.5, 0, 1)).toBe(0.5);
+        });
+    })
 });
