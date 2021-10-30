@@ -36,3 +36,13 @@ export const clamp = (value: number, min: number, max: number) =>
  */
 export const weigh = (value: number, min: number, max: number): number =>
     (value - min) / (max - min);
+
+/**
+ * Converts a value to a unit scalar from 0 to 1.
+ * @param value The value to convert
+ * @param min The min value
+ * @param max The max value
+ * @returns The unit value
+ */
+export const unit = (value: number, min: number, max: number): number =>
+    clamp(weigh(value, min, max), 0, 1);

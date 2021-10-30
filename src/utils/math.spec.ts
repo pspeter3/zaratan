@@ -1,4 +1,4 @@
-import { clamp, mix, snap, weigh } from "./math";
+import { clamp, mix, snap, unit, weigh } from "./math";
 
 describe("math", () => {
     describe("snap", () => {
@@ -46,6 +46,20 @@ describe("math", () => {
     describe("weigh", () => {
         it("should calculate the weight", () => {
             expect(weigh(2, 0, 4)).toBe(0.5);
+        });
+    });
+
+    describe("unit", () => {
+        it("should calculate the weight", () => {
+            expect(unit(2, 0, 4)).toBe(0.5);
+        });
+
+        it("should return 0 when value is less than min", () => {
+            expect(unit(-1, 0, 4)).toBe(0);
+        });
+
+        it("should return 1 when value is greater than max", () => {
+            expect(unit(5, 0, 4)).toBe(1);
         });
     });
 });
