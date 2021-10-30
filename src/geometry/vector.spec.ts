@@ -7,19 +7,6 @@ describe("Vector", () => {
         });
     });
 
-    describe("fromTuple", () => {
-        it("should create a vector from an array", () => {
-            expect(Vector.fromTuple([1, 1])).toEqual({ x: 1, y: 1 });
-        });
-
-        it("should create a vector from a typed array", () => {
-            expect(Vector.fromTuple(Uint16Array.from([1, 1]))).toEqual({
-                x: 1,
-                y: 1,
-            });
-        });
-    });
-
     describe("constructor", () => {
         it("should create a vector from values", () => {
             expect(new Vector(1, 1)).toEqual({ x: 1, y: 1 });
