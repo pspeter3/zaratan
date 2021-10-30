@@ -3,7 +3,8 @@
   "description": "Procedural Terrain Generator",
   "private": true,
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "fix:format": "prettier --write 'src/**/*' '*.{js,md}'"
   },
   "repository": {
     "type": "git",
@@ -12,5 +13,12 @@
   "bugs": {
     "url": "https://github.com/pspeter3/zaratan/issues"
   },
-  "homepage": "https://github.com/pspeter3/zaratan#readme"
+  "homepage": "https://github.com/pspeter3/zaratan#readme",
+  "devDependencies": {
+    "prettier": "^2.4.1"
+  },
+  "prettier": {
+    "tabWidth": 4,
+    "trailingComma": "all"
+  }
 }
