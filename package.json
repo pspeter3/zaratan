@@ -1,0 +1,16 @@
+{
+  "name": "zaratan",
+  "description": "Procedural Terrain Generator",
+  "private": true,
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/pspeter3/zaratan.git"
+  },
+  "bugs": {
+    "url": "https://github.com/pspeter3/zaratan/issues"
+  },
+  "homepage": "https://github.com/pspeter3/zaratan#readme"
+}
