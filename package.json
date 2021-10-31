@@ -39,7 +39,10 @@
     "collectCoverage": true,
     "transform": {
       "^.+\\.(t|j)sx?$": [
-        "@swc/jest"
+        "@swc/jest",
+        {
+          "sourceMaps": true
+        }
       ]
     }
   },

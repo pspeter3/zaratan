@@ -1,4 +1,4 @@
-import { snap } from "../utils/math";
+import { mix, snap } from "../utils/math";
 
 /**
  * 2D Vector.
@@ -58,11 +58,21 @@ export class Vector {
 
     /**
      * Subtracts a vector.
-     * @param vector The vector to add
+     * @param vector The vector to subtract
      * @returns The subtracted vector
      */
     sub({ x, y }: Vector): Vector {
         return new Vector(this.x - x, this.y - y);
+    }
+
+    /**
+     * Interpolate between another a vector.
+     * @param vector The vector to interpolate
+     * @param t The weight
+     * @returns The interpolated vector
+     */
+    mix({ x, y }: Vector, t: number): Vector {
+        return new Vector(mix(this.x, x, t), mix(this.y, y, t));
     }
 
     /**
@@ -128,6 +138,15 @@ export class Vector {
      */
     tuple(): readonly [x: number, y: number] {
         return [this.x, this.y];
+    }
+
+    /**
+     * Calculates the dot product
+     * @param vector The other vector
+     * @returns The dot product
+     */
+    dot({ x, y }: Vector): number {
+        return this.x * x + this.y * y;
     }
 
     /**
