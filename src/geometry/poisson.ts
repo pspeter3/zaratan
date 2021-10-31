@@ -2,7 +2,7 @@ import { TAU } from "../utils/constants";
 import { mix } from "../utils/math";
 import { HashNoise } from "../utils/noise";
 import { Bounds } from "./bounds";
-import { createCoords, readCoords, sliceCoords, writeCoords } from "./coords";
+import { Coords, CoordsBuilder } from "./coords";
 import { Vector } from "./vector";
 
 export interface PoissonConfig {
@@ -27,7 +27,7 @@ export class Poisson {
         noise,
         limit,
         edges,
-    }: PoissonConfig): Int16Array {
+    }: PoissonConfig): Coords {
         const poisson = new Poisson(
             radius,
             bounds,
@@ -55,7 +55,7 @@ export class Poisson {
             );
         }
         poisson.fill();
-        return poisson.coords();
+        return poisson.finish();
     }
 
     private readonly radius: number;
@@ -67,10 +67,9 @@ export class Poisson {
     private readonly factor: number;
     private readonly rquad: number;
     private readonly grid: Bounds;
-    private readonly data: Int16Array;
-    private count: number;
-    private cells: Map<number, number>;
-    private queue: number[];
+    private readonly coords: CoordsBuilder;
+    private readonly cells: Map<number, number>;
+    private readonly queue: number[];
 
     private constructor(
         radius: number,
@@ -95,22 +94,22 @@ export class Poisson {
         this.grid = Bounds.fromSize(
             this.bounds.size.scale(this.factor).ceil().add(new Vector(1, 1)),
         );
-        this.data = createCoords(this.grid.width * this.grid.height);
-        this.count = 0;
+        this.coords = new CoordsBuilder(this.grid.width * this.grid.height);
         this.cells = new Map();
         this.queue = [];
     }
 
-    private coords(): Int16Array {
-        return sliceCoords(this.data, this.count);
+    private finish(): Coords {
+        return this.coords.finish();
     }
 
     private fill(): void {
         while (this.queue.length > 0) {
             const index = Math.floor(
-                this.queue.length * this.random(this.count, this.queue.length),
+                this.queue.length *
+                    this.random(this.coords.length, this.queue.length),
             );
-            const vector = readCoords(this.data, index);
+            const vector = this.coords.at(index);
             const candidate = this.pick(vector);
             if (candidate !== null) {
                 this.sample(candidate);
@@ -147,7 +146,7 @@ export class Poisson {
                 const index = this.cells.get(id);
                 if (
                     index !== undefined &&
-                    vector.quadrance(readCoords(this.data, index)) < this.rquad
+                    vector.quadrance(this.coords.at(index)) < this.rquad
                 ) {
                     return false;
                 }
@@ -157,7 +156,12 @@ export class Poisson {
     }
 
     private pick(vector: Vector): Vector | null {
-        const seed = this.random(this.count, vector.x, vector.y);
+        const seed = this.random(
+            this.coords.length,
+            this.queue.length,
+            vector.x,
+            vector.y,
+        );
         for (let i = 0; i < this.limit; i++) {
             const angle = TAU * (seed + i / this.limit);
             const delta = Vector.fromPolar(this.radius, angle).snap();
@@ -174,11 +178,11 @@ export class Poisson {
     }
 
     private sample(vector: Vector): void {
+        const index = this.coords.length;
         const id = this.id(this.gridCell(vector));
-        writeCoords(this.data, this.count, vector);
-        this.cells.set(id, this.count);
-        this.queue.push(this.count);
-        this.count++;
+        this.coords.push(vector);
+        this.cells.set(id, index);
+        this.queue.push(index);
     }
 
     private sampleCorners(): void {

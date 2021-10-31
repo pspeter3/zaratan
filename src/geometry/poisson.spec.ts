@@ -14,7 +14,7 @@ describe("Poisson", () => {
             noise,
             edges: true,
         });
-        expect(coords).toHaveLength(2 * 4);
+        expect(coords).toHaveLength(4);
     });
 
     it("should fill edges", () => {
@@ -25,7 +25,7 @@ describe("Poisson", () => {
             noise,
             edges: true,
         });
-        expect(coords).toHaveLength(2 * 8);
+        expect(coords).toHaveLength(8);
     });
 
     it("should fill the disk with edges", () => {
@@ -36,7 +36,7 @@ describe("Poisson", () => {
             noise,
             edges: true,
         });
-        expect(coords.length).toBeGreaterThan(2 * 8);
+        expect(coords.length).toBeGreaterThan(8);
     });
 
     it("should fill the disk without edges", () => {
