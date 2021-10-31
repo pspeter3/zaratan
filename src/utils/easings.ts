@@ -27,3 +27,33 @@ export const smootherstep = (t: number): number =>
  */
 export const inversestep = (t: number): number =>
     0.5 - Math.sin(Math.asin(1 - 2 * t) / 3);
+
+export enum Easing {
+    Linear,
+    SmoothStep,
+    SmootherStep,
+    InverseStep,
+}
+
+/**
+ * Ease value based on easing function.
+ * @param easing The easing function
+ * @param t The value to ease
+ * @returns The eased value
+ */
+export const ease = (easing: Easing, t: number): number => {
+    switch (easing) {
+        case Easing.Linear: {
+            return linear(t);
+        }
+        case Easing.SmoothStep: {
+            return smoothstep(t);
+        }
+        case Easing.SmootherStep: {
+            return smootherstep(t);
+        }
+        case Easing.InverseStep: {
+            return inversestep(t);
+        }
+    }
+};

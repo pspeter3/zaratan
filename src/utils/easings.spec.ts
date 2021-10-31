@@ -1,4 +1,11 @@
-import { inversestep, linear, smootherstep, smoothstep } from "./easings";
+import {
+    ease,
+    Easing,
+    inversestep,
+    linear,
+    smootherstep,
+    smoothstep,
+} from "./easings";
 
 describe("easings", () => {
     function createEasingSuite(
@@ -20,8 +27,27 @@ describe("easings", () => {
             });
         });
     }
+
     createEasingSuite("linear", linear);
     createEasingSuite("smoothstep", smoothstep);
     createEasingSuite("smootherstep", smootherstep);
     createEasingSuite("inversestep", inversestep);
+
+    describe("ease", () => {
+        it("should work for linear", () => {
+            expect(ease(Easing.Linear, 1)).toBe(1);
+        });
+
+        it("should work for smoothstep", () => {
+            expect(ease(Easing.SmoothStep, 1)).toBe(1);
+        });
+
+        it("should work for smootherstep", () => {
+            expect(ease(Easing.SmootherStep, 1)).toBe(1);
+        });
+
+        it("should work for inversestep", () => {
+            expect(ease(Easing.InverseStep, 1)).toBe(1);
+        });
+    });
 });
