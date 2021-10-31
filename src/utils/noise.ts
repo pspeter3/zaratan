@@ -1,4 +1,5 @@
 import { hashList, List } from "./hash";
+import { float53 } from "./uint32";
 
 export type HashNoise = (values: List<number>) => number;
 
@@ -10,4 +11,4 @@ export type HashNoise = (values: List<number>) => number;
 export const createHashNoise =
     (seed: number): HashNoise =>
     (values) =>
-        hashList(values, seed);
+        float53(hashList(values, seed));
