@@ -15,15 +15,6 @@ export class Vector {
     }
 
     /**
-     * Creates a vector from a tuple.
-     * @param values The tuple of values
-     * @returns The new vector
-     */
-    static fromTuple(values: ArrayLike<number>) {
-        return new Vector(values[0], values[1]);
-    }
-
-    /**
      * The x component of the vector.
      */
     readonly x: number;

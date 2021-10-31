@@ -49,6 +49,20 @@ describe("Bounds", () => {
         it("should have yMax", () => {
             expect(new Bounds(origin, size).yMax).toBe(origin.y + size.y);
         });
+
+        it("should have an xRange", () => {
+            const bounds = Bounds.fromSize(new Vector(4, 4));
+            const range = bounds.xRange();
+            expect(range[0]).toBe(bounds.xMin);
+            expect(range[1]).toBe(bounds.xMax);
+        });
+
+        it("should have an yRange", () => {
+            const bounds = Bounds.fromSize(new Vector(4, 4));
+            const range = bounds.yRange();
+            expect(range[0]).toBe(bounds.yMin);
+            expect(range[1]).toBe(bounds.yMax);
+        });
     });
 
     describe("inBounds", () => {

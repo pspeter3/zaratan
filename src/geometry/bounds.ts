@@ -110,4 +110,12 @@ export class Bounds {
     center(): Vector {
         return this.origin.add(this.size.scale(0.5));
     }
+
+    xRange(): readonly [xMin: number, xMax: number] {
+        return [this.xMin, this.xMax];
+    }
+
+    yRange(): readonly [yMin: number, yMax: number] {
+        return [this.yMin, this.yMax];
+    }
 }
