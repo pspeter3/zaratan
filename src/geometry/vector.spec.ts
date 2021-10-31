@@ -1,3 +1,4 @@
+import { ORIGIN } from "../utils/constants";
 import { Vector } from "./vector";
 
 describe("Vector", () => {
@@ -41,6 +42,10 @@ describe("Vector", () => {
         it("should support multiplication", () => {
             expect(new Vector(1, 1).scale(2)).toEqual({ x: 2, y: 2 });
         });
+
+        it("should support mix", () => {
+            expect(ORIGIN.mix(new Vector(2, 2), 0.5)).toEqual({ x: 1, y: 1 });
+        });
     });
 
     describe("floats", () => {
@@ -72,6 +77,13 @@ describe("Vector", () => {
 
         it("should support quadrance", () => {
             expect(new Vector(1, 1).quadrance(new Vector(2, 2))).toBe(2);
+        });
+    });
+
+    describe("dot", () => {
+        it("should calculate the dot product", () => {
+            expect(new Vector(1, 1).dot(new Vector(0, 1))).toBe(1);
+            expect(new Vector(1, 1).dot(new Vector(2, 1))).toBe(3);
         });
     });
 

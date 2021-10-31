@@ -39,7 +39,13 @@
     "collectCoverage": true,
     "transform": {
       "^.+\\.(t|j)sx?$": [
-        "@swc/jest"
+        "@swc/jest",
+        {
+          "jsc": {
+            "target": "es2021"
+          },
+          "sourceMaps": true
+        }
       ]
     }
   },
