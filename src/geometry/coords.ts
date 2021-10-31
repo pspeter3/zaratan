@@ -1,46 +1,75 @@
 import { Vector } from "./vector";
 
-const DIMENSIONS = 2;
-const xOffset = (index: number): number => DIMENSIONS * index;
-const yOffset = (index: number): number => xOffset(index) + 1;
+/**
+ * Coordinates abstraction.
+ */
+export class Coords {
+    protected static readonly N = 2;
+    protected static xOffset(index: number): number {
+        return Coords.N * index;
+    }
+    protected static yOffset(index: number): number {
+        return Coords.xOffset(index) + 1;
+    }
+
+    /**
+     * Raw Int16Array data.
+     */
+    readonly data: Int16Array;
+    protected size: number;
+
+    protected constructor(data: Int16Array, size: number) {
+        this.data = data;
+        this.size = size;
+    }
+
+    /**
+     * The length of the coordinates data.
+     */
+    get length(): number {
+        return this.size;
+    }
+
+    /**
+     * The vector at an index.
+     * @param index The index
+     * @returns The vector
+     */
+    at(index: number): Vector {
+        return new Vector(
+            this.data[Coords.xOffset(index)],
+            this.data[Coords.yOffset(index)],
+        );
+    }
+}
 
 /**
- * Create coordinates with a capacity.
- * @param capacity The capacity
- * @returns The coordinates
+ * Coordinates builder helper class.
  */
-export const createCoords = (capacity: number): Int16Array =>
-    new Int16Array(DIMENSIONS * capacity);
+export class CoordsBuilder extends Coords {
+    /**
+     * Creates a coordinates builder with capacity.
+     * @param capacity The capacity
+     */
+    constructor(capacity: number) {
+        super(new Int16Array(Coords.N * capacity), 0);
+    }
 
-/**
- * Slice the coordinates based on the count
- * @param coords The coordinates to slice
- * @param count The count
- * @returns The sliced coordinates
- */
-export const sliceCoords = (coords: Int16Array, count: number): Int16Array =>
-    coords.slice(0, DIMENSIONS * count);
+    /**
+     * Adds a vector to the coordinates builder.
+     * @param vector The vector to add
+     */
+    push({ x, y }: Vector): void {
+        this.data[Coords.xOffset(this.size)] = x;
+        this.data[Coords.yOffset(this.size)] = y;
+        this.size++;
+    }
 
-/**
- * Writes a vector to coordinates.
- * @param coords The coordinates to write to
- * @param index The index to write at
- * @param vector The vector to write
- */
-export const writeCoords = (
-    coords: Int16Array,
-    index: number,
-    { x, y }: Vector,
-): void => {
-    coords[xOffset(index)] = x;
-    coords[yOffset(index)] = y;
-};
-
-/**
- * Reads a vector from coordinates.
- * @param coords The coordinates to read from
- * @param index The index to read at
- * @returns The vector
- */
-export const readCoords = (coords: Int16Array, index: number): Vector =>
-    new Vector(coords[xOffset(index)], coords[yOffset(index)]);
+    /**
+     * Finishes the coordinates building.
+     * @returns The finished coordinates
+     */
+    finish(): Coords {
+        return new Coords(this.data.slice(0, Coords.N * this.size), this.size);
+    }
+}
