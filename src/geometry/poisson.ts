@@ -109,7 +109,7 @@ export class Poisson {
                 this.queue.length *
                     this.random(this.coords.length, this.queue.length),
             );
-            const vector = this.coords.at(index);
+            const vector = this.coords.at(this.queue[index]);
             const candidate = this.pick(vector);
             if (candidate !== null) {
                 this.sample(candidate);
