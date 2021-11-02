@@ -36,9 +36,9 @@ export interface List<T> extends Iterable<T>, ArrayLike<T> {}
  * @returns The hash value
  */
 export const hashList = (list: List<number>, seed = 0): number => {
-    let hash = seed;
+    let hash = uint32(seed);
     for (const value of list) {
-        hash = mash(hash, value);
+        hash = mash(hash, uint32(value));
     }
     return finalize(hash, list.length * 4);
 };
