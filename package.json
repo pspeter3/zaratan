@@ -23,17 +23,17 @@
   },
   "homepage": "https://github.com/pspeter3/zaratan#readme",
   "devDependencies": {
-    "@swc/jest": "^0.2.5",
-    "@types/jest": "^27.0.2",
-    "@typescript-eslint/eslint-plugin": "^5.2.0",
-    "@typescript-eslint/parser": "^5.2.0",
-    "eslint": "^8.1.0",
-    "eslint-plugin-jest": "^25.2.2",
-    "jest": "^27.3.1",
+    "@swc/jest": "^0.2.11",
+    "@types/jest": "^27.0.3",
+    "@typescript-eslint/eslint-plugin": "^5.5.0",
+    "@typescript-eslint/parser": "^5.5.0",
+    "eslint": "^8.4.0",
+    "eslint-plugin-jest": "^25.3.0",
+    "jest": "^27.4.3",
     "npm-run-all": "^4.1.5",
-    "parcel": "^2.0.0",
-    "prettier": "^2.4.1",
-    "typescript": "^4.4.4"
+    "parcel": "^2.0.1",
+    "prettier": "^2.5.1",
+    "typescript": "^4.5.2"
   },
   "jest": {
     "collectCoverage": true,
