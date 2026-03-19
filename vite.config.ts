@@ -7,5 +7,9 @@ export default defineConfig({
   fmt: {
     sortImports: {},
   },
-  lint: { options: { typeAware: true, typeCheck: true } },
+  lint: {
+    categories: { correctness: "error" },
+    options: { typeAware: true, typeCheck: true },
+    plugins: ["vitest"],
+  },
 });
