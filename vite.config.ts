@@ -1,3 +1,4 @@
+import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite-plus";
 
 export default defineConfig({
@@ -12,4 +13,5 @@ export default defineConfig({
     options: { typeAware: true, typeCheck: true },
     plugins: ["vitest"],
   },
+  plugins: [tailwindcss()],
 });
