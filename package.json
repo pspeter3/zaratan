@@ -6,6 +6,9 @@
     "build": "vp build",
     "dev": "vp dev"
   },
+  "dependencies": {
+    "pure-rand": "^8.3.0"
+  },
   "devDependencies": {
     "@tailwindcss/vite": "^4.2.2",
     "@vitest/coverage-v8": "^4.1.0",
