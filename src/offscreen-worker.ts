@@ -1,26 +1,26 @@
 /// <reference lib="webworker" />
 
-export interface OffscreenWorkerInitMessage {
-  readonly kind: "init";
+import { createDualMeshScene, type Segment2D } from "./dual-mesh-scene";
+
+export interface OffscreenWorkerMessage {
   readonly canvas: OffscreenCanvas;
   readonly width: number;
   readonly height: number;
 }
 
-const FULL_CIRCLE = Math.PI * 2;
-const HEXAGON_SIDES = 6;
-const START_ANGLE = -Math.PI / 2;
+const DELAUNAY_STROKE_STYLE = "#505050";
+const DUAL_STROKE_STYLE = "#fff";
 
-addEventListener("message", (event: MessageEvent<OffscreenWorkerInitMessage>) => {
-  const { canvas, width, height } = event.data;
+addEventListener("message", ({ data }: MessageEvent<OffscreenWorkerMessage>) => {
+  const { canvas, width, height } = data;
   const context = canvas.getContext("2d", { alpha: false, desynchronized: true });
 
   if (!context) {
     throw new Error("Failed to create a 2D context for the offscreen canvas.");
   }
 
-  const bitmapWidth = Math.max(1, Math.round(width));
-  const bitmapHeight = Math.max(1, Math.round(height));
+  const bitmapWidth = normalizeBitmapDimension(width);
+  const bitmapHeight = normalizeBitmapDimension(height);
 
   canvas.width = bitmapWidth;
   canvas.height = bitmapHeight;
@@ -29,35 +29,36 @@ addEventListener("message", (event: MessageEvent<OffscreenWorkerInitMessage>) =>
 });
 
 function drawScene(ctx: OffscreenCanvasRenderingContext2D, width: number, height: number) {
-  const centerX = width / 2;
-  const centerY = height / 2;
-  const radius = Math.max(24, Math.min(width, height) * 0.36);
-  const lineWidth = Math.max(2, radius * 0.03);
+  const { delaunaySegments, dualSegments } = createDualMeshScene(width, height);
+  const baseLineWidth = Math.max(1, Math.min(width, height) * 0.002);
 
   ctx.fillStyle = "#000";
   ctx.fillRect(0, 0, width, height);
-  ctx.strokeStyle = "#fff";
+  ctx.lineJoin = "round";
+  ctx.lineCap = "round";
+
+  strokeSegments(ctx, delaunaySegments, DELAUNAY_STROKE_STYLE, baseLineWidth);
+  strokeSegments(ctx, dualSegments, DUAL_STROKE_STYLE, Math.max(2, baseLineWidth * 2));
+}
+
+function strokeSegments(
+  ctx: OffscreenCanvasRenderingContext2D,
+  segments: readonly Segment2D[],
+  strokeStyle: string,
+  lineWidth: number,
+) {
+  ctx.strokeStyle = strokeStyle;
   ctx.lineWidth = lineWidth;
-
   ctx.beginPath();
-  ctx.arc(centerX, centerY, radius, 0, FULL_CIRCLE);
-  ctx.stroke();
 
-  ctx.beginPath();
-  for (let index = 0; index < HEXAGON_SIDES; index += 1) {
-    const angle = START_ANGLE + (FULL_CIRCLE * index) / HEXAGON_SIDES;
-    const x = centerX + Math.cos(angle) * radius;
-    const y = centerY + Math.sin(angle) * radius;
-
-    if (index === 0) {
-      ctx.moveTo(x, y);
-      continue;
-    }
-
-    ctx.lineTo(x, y);
+  for (const { start, end } of segments) {
+    ctx.moveTo(start.x, start.y);
+    ctx.lineTo(end.x, end.y);
   }
 
-  ctx.closePath();
-  ctx.lineJoin = "round";
   ctx.stroke();
+}
+
+function normalizeBitmapDimension(size: number): number {
+  return Math.max(1, Math.round(size));
 }
