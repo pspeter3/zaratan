@@ -7,6 +7,7 @@ export default defineConfig({
   },
   fmt: {
     sortImports: {},
+    sortTailwindcss: {},
   },
   lint: {
     categories: { correctness: "error" },
