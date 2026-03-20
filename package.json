@@ -7,10 +7,13 @@
     "dev": "vp dev"
   },
   "dependencies": {
+    "delaunator": "^5.0.1",
+    "fast-2d-poisson-disk-sampling": "^1.0.3",
     "pure-rand": "^8.3.0"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.2.2",
+    "@types/delaunator": "^5.0.3",
     "@vitest/coverage-v8": "^4.1.0",
     "tailwindcss": "^4.2.2",
     "typescript": "~5.9.3",

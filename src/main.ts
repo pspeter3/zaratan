@@ -1,4 +1,4 @@
-import type { OffscreenWorkerInitMessage } from "./offscreen-worker";
+import type { OffscreenWorkerMessage } from "./offscreen-worker";
 
 import "./style.css";
 
@@ -11,11 +11,10 @@ canvas.height = SIZE;
 
 const worker = new Worker(new URL("./offscreen-worker.ts", import.meta.url), { type: "module" });
 const offscreenCanvas = canvas.transferControlToOffscreen();
-const initMessage: OffscreenWorkerInitMessage = {
-  kind: "init",
+const message: OffscreenWorkerMessage = {
   canvas: offscreenCanvas,
   width: SIZE,
   height: SIZE,
 };
 
-worker.postMessage(initMessage, [offscreenCanvas]);
+worker.postMessage(message, [offscreenCanvas]);
