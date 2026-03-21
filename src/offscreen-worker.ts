@@ -1,57 +1,80 @@
 /// <reference lib="webworker" />
 
-import { createDualMeshScene, type Segment2D } from "./dual-mesh-scene";
+import { DualMesh } from "./dual-mesh";
+import { poisson } from "./poisson";
+import { pointX, pointY, type PointBuffer, type PointId } from "./utils/point-buffer";
+import { createRandom } from "./utils/random";
 
 export interface OffscreenWorkerMessage {
   readonly canvas: OffscreenCanvas;
-  readonly width: number;
-  readonly height: number;
 }
 
+const SIZE = 1024;
+const WIDTH = SIZE;
+const HEIGHT = SIZE;
+const RADIUS = 128;
+const SEED = 42;
+
+const STROKE_SIZE = 2;
+const FILL_STYLE = "#000";
 const DELAUNAY_STROKE_STYLE = "#505050";
 const DUAL_STROKE_STYLE = "#fff";
 
-addEventListener("message", ({ data }: MessageEvent<OffscreenWorkerMessage>) => {
-  const { canvas, width, height } = data;
-  const context = canvas.getContext("2d", { alpha: false, desynchronized: true });
+addEventListener("message", render);
 
-  if (!context) {
-    throw new Error("Failed to create a 2D context for the offscreen canvas.");
+function render({ data: { canvas } }: MessageEvent<OffscreenWorkerMessage>): void {
+  const ctx = canvas.getContext("2d", { alpha: false });
+  if (ctx === null) {
+    throw new Error("Failed to created 2D context");
   }
-
-  canvas.width = width;
-  canvas.height = height;
-
-  drawScene(context, width, height);
-});
-
-function drawScene(ctx: OffscreenCanvasRenderingContext2D, width: number, height: number) {
-  const { delaunaySegments, dualSegments } = createDualMeshScene(width, height);
-  const baseLineWidth = Math.max(1, Math.min(width, height) * 0.002);
-
-  ctx.fillStyle = "#000";
-  ctx.fillRect(0, 0, width, height);
-  ctx.lineJoin = "round";
-  ctx.lineCap = "round";
-
-  strokeSegments(ctx, delaunaySegments, DELAUNAY_STROKE_STYLE, baseLineWidth);
-  strokeSegments(ctx, dualSegments, DUAL_STROKE_STYLE, Math.max(2, baseLineWidth * 2));
+  resize(canvas);
+  const mesh = new DualMesh(
+    poisson({
+      bounds: { min: { x: 0, y: 0 }, max: { x: WIDTH, y: HEIGHT } },
+      radius: RADIUS,
+      rand: createRandom(SEED),
+    }),
+  );
+  reset(ctx);
+  const delaunay = new Path2D();
+  const duals = new Path2D();
+  for (const edge of mesh.edgeIds()) {
+    const opposite = mesh.edgeOpposite(edge);
+    if (opposite !== null && edge > opposite) {
+      continue;
+    }
+    addSegment(delaunay, mesh.points, mesh.edgeStartPoint(edge), mesh.edgeEndPoint(edge));
+    if (opposite === null) {
+      continue;
+    }
+    addSegment(
+      duals,
+      mesh.corners,
+      mesh.triangleCorner(DualMesh.edgeTriangle(edge)),
+      mesh.triangleCorner(DualMesh.edgeTriangle(opposite)),
+    );
+  }
+  ctx.strokeStyle = DELAUNAY_STROKE_STYLE;
+  ctx.lineWidth = STROKE_SIZE;
+  ctx.stroke(delaunay);
+  ctx.strokeStyle = DUAL_STROKE_STYLE;
+  ctx.lineWidth = STROKE_SIZE * 2;
+  ctx.stroke(duals);
 }
 
-function strokeSegments(
-  ctx: OffscreenCanvasRenderingContext2D,
-  segments: readonly Segment2D[],
-  strokeStyle: string,
-  lineWidth: number,
-) {
-  ctx.strokeStyle = strokeStyle;
-  ctx.lineWidth = lineWidth;
-  ctx.beginPath();
+function resize(canvas: OffscreenCanvas): void {
+  canvas.width = WIDTH;
+  canvas.height = HEIGHT;
+}
 
-  for (const { start, end } of segments) {
-    ctx.moveTo(start.x, start.y);
-    ctx.lineTo(end.x, end.y);
-  }
+function reset(ctx: OffscreenCanvasRenderingContext2D): void {
+  ctx.fillStyle = FILL_STYLE;
+  ctx.fillRect(0, 0, WIDTH, HEIGHT);
+  ctx.lineJoin = "round";
+  ctx.lineCap = "round";
+}
 
-  ctx.stroke();
+function addSegment(path: Path2D, buffer: PointBuffer, source: PointId, target: PointId): void {
+  path.moveTo(pointX(buffer, source), pointY(buffer, source));
+  path.lineTo(pointX(buffer, target), pointY(buffer, target));
 }
