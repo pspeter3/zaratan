@@ -47,12 +47,7 @@ function render({ data: { canvas } }: MessageEvent<OffscreenWorkerMessage>): voi
     if (opposite === null) {
       continue;
     }
-    addSegment(
-      duals,
-      mesh.corners,
-      mesh.triangleCorner(DualMesh.edgeTriangle(edge)),
-      mesh.triangleCorner(DualMesh.edgeTriangle(opposite)),
-    );
+    addSegment(duals, mesh.corners, DualMesh.edgeTriangle(edge), DualMesh.edgeTriangle(opposite));
   }
   ctx.strokeStyle = DELAUNAY_STROKE_STYLE;
   ctx.lineWidth = STROKE_SIZE;
