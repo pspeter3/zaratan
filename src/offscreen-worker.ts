@@ -19,13 +19,10 @@ addEventListener("message", ({ data }: MessageEvent<OffscreenWorkerMessage>) => 
     throw new Error("Failed to create a 2D context for the offscreen canvas.");
   }
 
-  const bitmapWidth = normalizeBitmapDimension(width);
-  const bitmapHeight = normalizeBitmapDimension(height);
+  canvas.width = width;
+  canvas.height = height;
 
-  canvas.width = bitmapWidth;
-  canvas.height = bitmapHeight;
-
-  drawScene(context, bitmapWidth, bitmapHeight);
+  drawScene(context, width, height);
 });
 
 function drawScene(ctx: OffscreenCanvasRenderingContext2D, width: number, height: number) {
@@ -57,8 +54,4 @@ function strokeSegments(
   }
 
   ctx.stroke();
-}
-
-function normalizeBitmapDimension(size: number): number {
-  return Math.max(1, Math.round(size));
 }
