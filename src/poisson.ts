@@ -36,17 +36,20 @@ export function poisson({
   const vSegments = segments(height, radius);
   const hStep = step(width, hSegments);
   const vStep = step(height, vSegments);
-  const horizontalOffset = offset(hStep);
-  const verticalOffset = offset(vStep);
+  const hOffset = offset(hStep);
+  const vOffset = offset(vStep);
 
   for (let i = 0; i <= hSegments; i++) {
     const x = hStep * i;
-    pds.addPoint([x, 0]);
-    pds.addPoint([x, height]);
+    for (const y of [0, height]) {
+      pds.addPoint([x, y]);
+    }
 
     if (i < hSegments) {
-      const midX = x + hStep / 2;
-      outer.push([midX, -horizontalOffset], [midX, height + horizontalOffset]);
+      const mX = x + hStep / 2;
+      for (const mY of [-hOffset, height + hOffset]) {
+        outer.push([mX, mY]);
+      }
     }
   }
 
@@ -55,12 +58,15 @@ export function poisson({
     const y = vStep * i;
 
     if (i > 0) {
-      pds.addPoint([0, y]);
-      pds.addPoint([width, y]);
+      for (const x of [0, width]) {
+        pds.addPoint([x, y]);
+      }
     }
 
-    const midY = y + vStep / 2;
-    outer.push([-verticalOffset, midY], [width + verticalOffset, midY]);
+    const mY = y + vStep / 2;
+    for (const mX of [-vOffset, width + vOffset]) {
+      outer.push([mX, mY]);
+    }
   }
 
   pds.fill();
