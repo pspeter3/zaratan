@@ -16,9 +16,12 @@ export function poisson({
   tries,
   rand,
 }: PoissonParams): Float64Array {
+  const width = max.x - min.x;
+  const height = max.y - min.y;
+  const cell = radius * Math.SQRT1_2;
   const pds = new FastPoissonDiskSampling(
     {
-      shape: [max.x - min.x, max.y - min.y],
+      shape: [width + cell, height + cell],
       radius,
       tries,
     },
