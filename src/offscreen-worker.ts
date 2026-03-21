@@ -5,8 +5,13 @@ import { poisson } from "./poisson";
 import { pointX, pointY, type PointBuffer, type PointId } from "./utils/point-buffer";
 import { createRandom } from "./utils/random";
 
-export interface OffscreenWorkerMessage {
+export interface OffscreenInitMessage {
   readonly canvas: OffscreenCanvas;
+}
+
+export interface OffscreenStageMessage {
+  readonly name: string;
+  readonly blob: Blob;
 }
 
 const SIZE = 1024;
@@ -22,7 +27,7 @@ const DUAL_STROKE_STYLE = "#fff";
 
 addEventListener("message", render);
 
-function render({ data: { canvas } }: MessageEvent<OffscreenWorkerMessage>): void {
+async function render({ data: { canvas } }: MessageEvent<OffscreenInitMessage>): Promise<void> {
   const ctx = canvas.getContext("2d", { alpha: false });
   if (ctx === null) {
     throw new Error("Failed to created 2D context");
@@ -55,6 +60,9 @@ function render({ data: { canvas } }: MessageEvent<OffscreenWorkerMessage>): voi
   ctx.strokeStyle = DUAL_STROKE_STYLE;
   ctx.lineWidth = STROKE_SIZE * 2;
   ctx.stroke(duals);
+  const blob = await canvas.convertToBlob();
+  const message: OffscreenStageMessage = { name: "Dual Mesh", blob };
+  postMessage(message);
 }
 
 function resize(canvas: OffscreenCanvas): void {
