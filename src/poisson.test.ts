@@ -39,7 +39,7 @@ function buildInnerBoundary(bounds: Bounds2D, radius: number): Point2D[] {
   for (let i = 0; i < corners.length; i++) {
     const source = corners[i];
     const target = corners[(i + 1) % corners.length];
-    const segments = Math.round(distance(source, target) / radius);
+    const segments = Math.max(1, Math.floor(distance(source, target) / radius));
     const dx = (target.x - source.x) / segments;
     const dy = (target.y - source.y) / segments;
     for (let step = 0; step < segments; step++) {
@@ -79,20 +79,21 @@ function closeToPoint(point: Point2D): ReturnType<typeof expect.objectContaining
   });
 }
 
-test("poisson", () => {
-  const bounds: Bounds2D = {
-    min: { x: 0, y: 0 },
-    max: { x: 1, y: 1 },
-  };
-  const radius = 0.125;
-  const buffer = poisson({ bounds, radius, rand: createRandom(42) });
+function expectPoissonBoundary({
+  bounds,
+  radius,
+  seed,
+}: {
+  readonly bounds: Bounds2D;
+  readonly radius: number;
+  readonly seed: number;
+}): void {
+  const buffer = poisson({ bounds, radius, rand: createRandom(seed) });
   const points = toPoints(buffer);
   const innerBoundary = buildInnerBoundary(bounds, radius);
   const outerBoundary = buildOuterBoundary(innerBoundary);
   const outsideBounds = points.filter((point) => !isWithinBounds(point, bounds));
 
-  expect(innerBoundary).toHaveLength(32);
-  expect(outerBoundary).toHaveLength(32);
   expect(innerBoundary).toEqual(
     expect.arrayContaining([
       { x: bounds.min.x, y: bounds.min.y },
@@ -111,4 +112,26 @@ test("poisson", () => {
       expect(distance(points[i], points[j])).toBeGreaterThanOrEqual(radius - EPSILON);
     }
   }
+}
+
+test("poisson", () => {
+  const bounds: Bounds2D = {
+    min: { x: 0, y: 0 },
+    max: { x: 1, y: 1 },
+  };
+  const radius = 0.125;
+
+  expect(buildInnerBoundary(bounds, radius)).toHaveLength(32);
+  expectPoissonBoundary({ bounds, radius, seed: 42 });
+});
+
+test("poisson keeps sampler points within bounds", () => {
+  expectPoissonBoundary({
+    bounds: {
+      min: { x: 0, y: 0 },
+      max: { x: 1.49, y: 1.49 },
+    },
+    radius: 1,
+    seed: 3,
+  });
 });

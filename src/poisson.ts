@@ -22,15 +22,15 @@ export function poisson({
 }: PoissonParams): Float64Array {
   const width = max.x - min.x;
   const height = max.y - min.y;
-  const cell = radius * Math.SQRT1_2;
   const pds = new FastPoissonDiskSampling(
     {
-      shape: [width + cell, height + cell],
+      shape: [width, height],
       radius,
       tries,
     },
     rand,
   );
+  const boundary: FastPoissonDiskSamplingPoint[] = [];
   const outer: FastPoissonDiskSamplingPoint[] = [];
   const hSegments = segments(width, radius);
   const vSegments = segments(height, radius);
@@ -42,7 +42,7 @@ export function poisson({
   for (let i = 0; i <= hSegments; i++) {
     const x = hStep * i;
     for (const y of [0, height]) {
-      pds.addPoint([x, y]);
+      boundary.push([x, y]);
     }
 
     if (i < hSegments) {
@@ -59,7 +59,7 @@ export function poisson({
 
     if (i > 0) {
       for (const x of [0, width]) {
-        pds.addPoint([x, y]);
+        boundary.push([x, y]);
       }
     }
 
@@ -69,18 +69,22 @@ export function poisson({
     }
   }
 
+  for (const point of boundary) {
+    pds.addPoint(seedPoint(point, width, height));
+  }
+
   pds.fill();
+  const interior = pds.getAllPoints().slice(boundary.length);
   return Float64Array.from(
-    pds
-      .getAllPoints()
-      .concat(outer)
+    boundary
+      .concat(interior, outer)
       .values()
       .flatMap(([x, y]) => [x + min.x, y + min.y]),
   );
 }
 
 function segments(side: number, radius: number): number {
-  return Math.max(1, Math.round(side / radius));
+  return Math.max(1, Math.floor(side / radius));
 }
 
 function step(side: number, segments: number): number {
@@ -89,4 +93,19 @@ function step(side: number, segments: number): number {
 
 function offset(step: number): number {
   return step * EQUILATERAL;
+}
+
+function seedPoint(
+  [x, y]: FastPoissonDiskSamplingPoint,
+  width: number,
+  height: number,
+): FastPoissonDiskSamplingPoint {
+  return [seedCoordinate(x, width), seedCoordinate(y, height)];
+}
+
+function seedCoordinate(value: number, max: number): number {
+  if (value < max) {
+    return value;
+  }
+  return max * (1 - Number.EPSILON);
 }
