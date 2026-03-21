@@ -1,7 +1,11 @@
-import FastPoissonDiskSampling from "fast-2d-poisson-disk-sampling";
+import FastPoissonDiskSampling, {
+  type FastPoissonDiskSamplingPoint,
+} from "fast-2d-poisson-disk-sampling";
 
 import type { Bounds2D } from "./utils/geometry";
 import type { Random } from "./utils/random";
+
+const EQUILATERAL = Math.sqrt(3) / 2;
 
 export interface PoissonParams {
   readonly bounds: Bounds2D;
@@ -16,19 +20,92 @@ export function poisson({
   tries,
   rand,
 }: PoissonParams): Float64Array {
+  const width = max.x - min.x;
+  const height = max.y - min.y;
   const pds = new FastPoissonDiskSampling(
     {
-      shape: [max.x - min.x, max.y - min.y],
+      shape: [width, height],
       radius,
       tries,
     },
     rand,
   );
+  const boundary: FastPoissonDiskSamplingPoint[] = [];
+  const outer: FastPoissonDiskSamplingPoint[] = [];
+  const hSegments = segments(width, radius);
+  const vSegments = segments(height, radius);
+  const hStep = step(width, hSegments);
+  const vStep = step(height, vSegments);
+  const hOffset = offset(hStep);
+  const vOffset = offset(vStep);
+
+  for (let i = 0; i <= hSegments; i++) {
+    const x = hStep * i;
+    for (const y of [0, height]) {
+      boundary.push([x, y]);
+    }
+
+    if (i < hSegments) {
+      const mX = x + hStep / 2;
+      for (const mY of [-hOffset, height + hOffset]) {
+        outer.push([mX, mY]);
+      }
+    }
+  }
+
+  // Horizontal edges own the four corners; vertical edges add only interior points.
+  for (let i = 0; i < vSegments; i++) {
+    const y = vStep * i;
+
+    if (i > 0) {
+      for (const x of [0, width]) {
+        boundary.push([x, y]);
+      }
+    }
+
+    const mY = y + vStep / 2;
+    for (const mX of [-vOffset, width + vOffset]) {
+      outer.push([mX, mY]);
+    }
+  }
+
+  for (const point of boundary) {
+    pds.addPoint(seedPoint(point, width, height));
+  }
+
   pds.fill();
+  const interior = pds.getAllPoints().slice(boundary.length);
   return Float64Array.from(
-    pds
-      .getAllPoints()
+    boundary
+      .concat(interior, outer)
       .values()
       .flatMap(([x, y]) => [x + min.x, y + min.y]),
   );
+}
+
+function segments(side: number, radius: number): number {
+  return Math.max(1, Math.floor(side / radius));
+}
+
+function step(side: number, segments: number): number {
+  return side / segments;
+}
+
+function offset(step: number): number {
+  return step * EQUILATERAL;
+}
+
+function seedPoint(
+  [x, y]: FastPoissonDiskSamplingPoint,
+  width: number,
+  height: number,
+): FastPoissonDiskSamplingPoint {
+  return [seedCoordinate(x, width), seedCoordinate(y, height)];
+}
+
+function seedCoordinate(value: number, max: number): number {
+  if (value < max) {
+    return value;
+  }
+  return max * (1 - Number.EPSILON);
 }
