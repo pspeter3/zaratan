@@ -1,6 +1,6 @@
 import { expect, test } from "vite-plus/test";
 
-import { type CornerId, DualMesh, type EdgeId, type TriangleId } from "./dual-mesh";
+import { DualMesh, type EdgeId, type TriangleId } from "./dual-mesh";
 import { pointCount, pointX, pointY, type PointId } from "./utils/point-buffer";
 
 function asPointId(value: number): PointId {
@@ -13,10 +13,6 @@ function asEdgeId(value: number): EdgeId {
 
 function asTriangleId(value: number): TriangleId {
   return value as TriangleId;
-}
-
-function asCornerId(value: number): CornerId {
-  return value as CornerId;
 }
 
 function fixturePoints(): Float64Array {
@@ -39,8 +35,8 @@ test("point-buffer helpers work with mesh points and corners", () => {
   expect(pointY(mesh.points, asPointId(4))).toBe(1);
 
   expect(pointCount(mesh.corners)).toBe(4);
-  expect(pointX(mesh.corners, asCornerId(2))).toBe(2);
-  expect(pointY(mesh.corners, asCornerId(2))).toBeCloseTo(2 / 3);
+  expect(pointX(mesh.corners, asTriangleId(2))).toBe(2);
+  expect(pointY(mesh.corners, asTriangleId(2))).toBeCloseTo(2 / 3);
 });
 
 test("edge topology helpers match the fixed triangulation", () => {
@@ -60,19 +56,18 @@ test("edge topology helpers match the fixed triangulation", () => {
   expect(mesh.edgeOpposite(asEdgeId(1))).toBeNull();
 });
 
-test("triangle and corner ids map one-to-one", () => {
+test("triangle ids index the dual corners buffer directly", () => {
   const mesh = new DualMesh(fixturePoints());
 
-  expect(mesh.triangleCorner(asTriangleId(3))).toBe(3);
-  expect(mesh.cornerTriangle(asCornerId(3))).toBe(3);
+  expect(pointX(mesh.corners, asTriangleId(3))).toBeCloseTo(4 / 3);
+  expect(pointY(mesh.corners, asTriangleId(3))).toBeCloseTo(4 / 3);
 });
 
-test("id iterators expose all branded edge, triangle, and corner ids", () => {
+test("id iterators expose all branded edge and triangle ids", () => {
   const mesh = new DualMesh(fixturePoints());
 
   expect(Array.from(mesh.edgeIds())).toEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
   expect(Array.from(mesh.triangleIds())).toEqual([0, 1, 2, 3]);
-  expect(Array.from(mesh.cornerIds())).toEqual([0, 1, 2, 3]);
 });
 
 test("triangle traversal helpers preserve raw Delaunator-derived order", () => {

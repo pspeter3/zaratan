@@ -1,11 +1,10 @@
 import Delaunator from "delaunator";
 
 import type { Brand } from "./utils/brand";
-import { pointIds, pointX, pointY, type PointBuffer, type PointId } from "./utils/point-buffer";
+import { pointX, pointY, type PointBuffer, type PointId } from "./utils/point-buffer";
 
-export type TriangleId = Brand<number, "TriangleId">;
+export type TriangleId = Brand<PointId, "TriangleId">;
 export type EdgeId = Brand<number, "EdgeId">;
-export type CornerId = Brand<PointId, "CornerId">;
 
 const TRIANGLE_STRIDE = 3;
 
@@ -23,6 +22,7 @@ export class DualMesh {
   static edgeTriangle(edge: EdgeId): TriangleId {
     return Math.floor(edge / TRIANGLE_STRIDE) as TriangleId;
   }
+
   readonly points: PointBuffer;
   readonly corners: PointBuffer;
 
@@ -35,7 +35,7 @@ export class DualMesh {
       this.triangleIds().flatMap((t) => {
         let cx = 0;
         let cy = 0;
-        for (const point of this.trianglePoints(t as TriangleId)) {
+        for (const point of this.trianglePoints(t)) {
           cx += pointX(this.points, point);
           cy += pointY(this.points, point);
         }
@@ -57,14 +57,6 @@ export class DualMesh {
     return this.#delaunator.triangles[DualMesh.nextEdge(edge)] as PointId;
   }
 
-  triangleCorner(triangle: TriangleId): CornerId {
-    return triangle as CornerId;
-  }
-
-  cornerTriangle(corner: CornerId): TriangleId {
-    return corner as TriangleId;
-  }
-
   *edgeIds(): Generator<EdgeId> {
     for (let edge = 0; edge < this.#delaunator.triangles.length; edge++) {
       yield edge as EdgeId;
@@ -76,10 +68,6 @@ export class DualMesh {
     for (let triangle = 0; triangle < triangleCount; triangle++) {
       yield triangle as TriangleId;
     }
-  }
-
-  cornerIds(): Generator<CornerId> {
-    return pointIds(this.corners) as Generator<CornerId>;
   }
 
   *triangleEdges(triangle: TriangleId): Generator<EdgeId> {
