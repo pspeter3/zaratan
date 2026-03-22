@@ -77,6 +77,28 @@ describe("Bounds2D", () => {
     expect(bounds.max.x).toEqual(3);
     expect(bounds.max.y).toEqual(4);
   });
+
+  test("contains returns true for interior points", () => {
+    const bounds = new Bounds2D(new Point2D(1, 2), new Point2D(3, 4));
+
+    expect(bounds.contains({ x: 2, y: 3 })).toBe(true);
+  });
+
+  test("contains includes points on the boundary", () => {
+    const bounds = new Bounds2D(new Point2D(1, 2), new Point2D(3, 4));
+
+    expect(bounds.contains({ x: 1, y: 2 })).toBe(true);
+    expect(bounds.contains({ x: 3, y: 4 })).toBe(true);
+    expect(bounds.contains({ x: 1, y: 3 })).toBe(true);
+    expect(bounds.contains({ x: 2, y: 4 })).toBe(true);
+  });
+
+  test("contains returns false for points outside the bounds", () => {
+    const bounds = new Bounds2D(new Point2D(1, 2), new Point2D(3, 4));
+
+    expect(bounds.contains({ x: 0, y: 3 })).toBe(false);
+    expect(bounds.contains({ x: 2, y: 5 })).toBe(false);
+  });
 });
 
 describe("Segment2D", () => {

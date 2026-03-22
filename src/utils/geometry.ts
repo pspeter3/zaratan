@@ -143,6 +143,16 @@ export class Bounds2D {
     this.min = min;
     this.max = max;
   }
+
+  /**
+   * Returns whether a point lies within these bounds, including the boundary.
+   *
+   * @param point - The point to test.
+   * @returns `true` when `point` is inside or on the bounds.
+   */
+  contains({ x, y }: Point2DRecord): boolean {
+    return x >= this.min.x && x <= this.max.x && y >= this.min.y && y <= this.max.y;
+  }
 }
 
 /**
