@@ -4,7 +4,9 @@ import { clamp, mix } from "./math";
  * A read-only object representation of a 2D point.
  */
 export interface Point2DRecord {
+  /** The horizontal coordinate. */
   readonly x: number;
+  /** The vertical coordinate. */
   readonly y: number;
 }
 
@@ -37,7 +39,9 @@ export class Point2D implements Point2DRecord {
     return new Point2D(x, y);
   }
 
+  /** The horizontal coordinate. */
   readonly x: number;
+  /** The vertical coordinate. */
   readonly y: number;
 
   /**
@@ -97,7 +101,9 @@ export class Point2D implements Point2DRecord {
  * A read-only object representation of 2D bounds.
  */
 export interface Bounds2DRecord {
+  /** The minimum or lower-left corner. */
   readonly min: Point2DRecord;
+  /** The maximum or upper-right corner. */
   readonly max: Point2DRecord;
 }
 
@@ -130,7 +136,9 @@ export class Bounds2D {
     return new Bounds2D(Point2D.fromTuple(min), Point2D.fromTuple(max));
   }
 
+  /** The minimum or lower-left corner. */
   readonly min: Point2D;
+  /** The maximum or upper-right corner. */
   readonly max: Point2D;
 
   /**
@@ -159,7 +167,9 @@ export class Bounds2D {
  * A read-only object representation of a 2D segment.
  */
 export interface Segment2DRecord {
+  /** The segment start point. */
   readonly source: Point2DRecord;
+  /** The segment end point. */
   readonly target: Point2DRecord;
 }
 
@@ -192,7 +202,9 @@ export class Segment2D {
     return new Segment2D(Point2D.fromTuple(source), Point2D.fromTuple(target));
   }
 
+  /** The segment start point. */
   readonly source: Point2D;
+  /** The segment end point. */
   readonly target: Point2D;
 
   /**
