@@ -9,8 +9,7 @@
   "dependencies": {
     "delaunator": "^5.0.1",
     "fast-2d-poisson-disk-sampling": "^1.0.3",
-    "pure-rand": "^8.3.0",
-    "simplex-noise": "^4.0.3"
+    "pure-rand": "^8.3.0"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.2.2",
