@@ -166,25 +166,21 @@ function contourSegments(mesh: DualMesh, heightmap: Float64Array, level: number)
       (heightmap[b] >= level ? 2 : 0) |
       (heightmap[c] >= level ? 4 : 0);
 
-    switch (mask) {
-      case 0:
-      case 7:
-        break;
-      case 1:
-      case 6:
-        segments.push(contourSegment(mesh.points, a, b, c, a, heightmap, level, pointsByKey));
-        break;
-      case 2:
-      case 5:
-        segments.push(contourSegment(mesh.points, a, b, b, c, heightmap, level, pointsByKey));
-        break;
-      case 3:
-      case 4:
-        segments.push(contourSegment(mesh.points, b, c, c, a, heightmap, level, pointsByKey));
-        break;
-      default:
-        throw new Error(`Unexpected contour mask: ${mask}`);
+    if (mask === 0 || mask === 7) {
+      continue;
     }
+
+    if (mask === 1 || mask === 6) {
+      segments.push(contourSegment(mesh.points, a, b, c, a, heightmap, level, pointsByKey));
+      continue;
+    }
+
+    if (mask === 2 || mask === 5) {
+      segments.push(contourSegment(mesh.points, a, b, b, c, heightmap, level, pointsByKey));
+      continue;
+    }
+
+    segments.push(contourSegment(mesh.points, b, c, c, a, heightmap, level, pointsByKey));
   }
 
   return segments;
