@@ -73,7 +73,7 @@ test("id iterators expose all branded edge and triangle ids", () => {
 test("triangle traversal helpers preserve raw Delaunator-derived order", () => {
   const mesh = new DualMesh(fixturePoints());
 
-  expect(Array.from(mesh.triangleEdges(asTriangleId(1)))).toEqual([3, 4, 5]);
+  expect(Array.from(DualMesh.triangleEdges(asTriangleId(1)))).toEqual([3, 4, 5]);
   expect(Array.from(mesh.trianglePoints(asTriangleId(1)))).toEqual([0, 2, 4]);
   expect(Array.from(mesh.triangleNeighbors(asTriangleId(1)))).toEqual([3, 0]);
 });

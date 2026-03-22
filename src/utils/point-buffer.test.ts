@@ -35,9 +35,16 @@ test("pointX and pointY read coordinates at the requested id", () => {
 test("helpers work with typed arrays via PointBuffer", () => {
   const buffer = new Float32Array([1.5, 2.5, 3.5, 4.5]);
   const ids = Array.from(pointIds(buffer));
+  const secondId = ids[1];
 
   expect(pointCount(buffer)).toBe(2);
   expect(ids).toEqual([0, 1]);
-  expect(pointX(buffer, ids[1]!)).toBeCloseTo(3.5);
-  expect(pointY(buffer, ids[1]!)).toBeCloseTo(4.5);
+  expect(secondId).toBe(1);
+
+  if (secondId === undefined) {
+    throw new Error("Expected a second point id.");
+  }
+
+  expect(pointX(buffer, secondId)).toBeCloseTo(3.5);
+  expect(pointY(buffer, secondId)).toBeCloseTo(4.5);
 });

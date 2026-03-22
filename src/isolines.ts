@@ -182,6 +182,8 @@ function contourSegments(mesh: DualMesh, heightmap: Float64Array, level: number)
       case 4:
         segments.push(contourSegment(mesh.points, b, c, c, a, heightmap, level, pointsByKey));
         break;
+      default:
+        throw new Error(`Unexpected contour mask: ${mask}`);
     }
   }
 

@@ -23,6 +23,13 @@ export class DualMesh {
     return Math.floor(edge / TRIANGLE_STRIDE) as TriangleId;
   }
 
+  static *triangleEdges(triangle: TriangleId): Generator<EdgeId> {
+    const firstEdge = triangle * TRIANGLE_STRIDE;
+    yield firstEdge as EdgeId;
+    yield (firstEdge + 1) as EdgeId;
+    yield (firstEdge + 2) as EdgeId;
+  }
+
   readonly points: PointBuffer;
   readonly corners: PointBuffer;
 
@@ -70,13 +77,6 @@ export class DualMesh {
     }
   }
 
-  *triangleEdges(triangle: TriangleId): Generator<EdgeId> {
-    const firstEdge = triangle * TRIANGLE_STRIDE;
-    yield firstEdge as EdgeId;
-    yield (firstEdge + 1) as EdgeId;
-    yield (firstEdge + 2) as EdgeId;
-  }
-
   *trianglePoints(triangle: TriangleId): Generator<PointId> {
     const firstEdge = triangle * TRIANGLE_STRIDE;
     yield this.#delaunator.triangles[firstEdge] as PointId;
@@ -85,7 +85,7 @@ export class DualMesh {
   }
 
   *triangleNeighbors(triangle: TriangleId): Generator<TriangleId> {
-    for (const edge of this.triangleEdges(triangle)) {
+    for (const edge of DualMesh.triangleEdges(triangle)) {
       const opposite = this.edgeOpposite(edge);
       if (opposite !== null) {
         yield DualMesh.edgeTriangle(opposite);
