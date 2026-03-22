@@ -182,8 +182,6 @@ function contourSegments(mesh: DualMesh, heightmap: Float64Array, level: number)
       case 4:
         segments.push(contourSegment(mesh.points, b, c, c, a, heightmap, level, pointsByKey));
         break;
-      default:
-        break;
     }
   }
 
@@ -256,7 +254,7 @@ function interpolateEdge(
   level: number,
 ): [number, number] {
   const delta = targetHeight - sourceHeight;
-  const offset = delta === 0 ? 0.5 : (level - sourceHeight) / delta;
+  const offset = (level - sourceHeight) / delta;
   const x = interpolate(pointX(buffer, source), pointX(buffer, target), offset);
   const y = interpolate(pointY(buffer, source), pointY(buffer, target), offset);
   return [x, y];
@@ -365,10 +363,6 @@ function resampleClosedContour(points: readonly Point2D[]): Point2D[] {
 }
 
 function resampleContour(points: readonly Point2D[], closed: boolean): Point2D[] {
-  if (points.length < 3) {
-    return [...points];
-  }
-
   const segmentLengths = contourSegmentLengths(points, closed);
   const totalLength = segmentLengths.reduce((sum, length) => sum + length, 0);
   if (totalLength === 0) {
