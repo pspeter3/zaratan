@@ -3,6 +3,7 @@
 import { createNoise2D } from "simplex-noise";
 
 import { DualMesh } from "./dual-mesh";
+import { addCatmullRomIsolines, addIsolines, contourLevels } from "./isolines";
 import { poisson } from "./poisson";
 import { pointIds, pointX, pointY, type PointBuffer, type PointId } from "./utils/point-buffer";
 import { createRandom } from "./utils/random";
@@ -20,7 +21,7 @@ const SIZE = 1024;
 const WIDTH = SIZE;
 const HEIGHT = SIZE;
 const RADIUS = 128;
-const SEED = 42;
+const SEED = 1337;
 
 const STROKE_SIZE = 2;
 const FILL_STYLE = "#000";
@@ -72,7 +73,8 @@ async function render({ data: { canvas } }: MessageEvent<OffscreenInitMessage>):
     noise(pointX(mesh.points, id) / SIZE, pointY(mesh.points, id) / SIZE),
   );
   const isolines = new Path2D();
-  for (const level of contourLevels(mesh.points, heightmap, ISOLINE_COUNT)) {
+  const levels = contourLevels(mesh.points, heightmap, ISOLINE_COUNT, WIDTH, HEIGHT);
+  for (const level of levels) {
     addIsolines(isolines, mesh, heightmap, level);
   }
   ctx.strokeStyle = DELAUNAY_STROKE_STYLE;
@@ -82,6 +84,18 @@ async function render({ data: { canvas } }: MessageEvent<OffscreenInitMessage>):
   ctx.lineWidth = STROKE_SIZE * 1.5;
   ctx.stroke(isolines);
   await snapshot("Isolines", canvas);
+  reset(ctx);
+  const splines = new Path2D();
+  for (const level of levels) {
+    addCatmullRomIsolines(splines, mesh, heightmap, level);
+  }
+  ctx.strokeStyle = DELAUNAY_STROKE_STYLE;
+  ctx.lineWidth = STROKE_SIZE;
+  ctx.stroke(delaunay);
+  ctx.strokeStyle = ISOLINE_STROKE_STYLE;
+  ctx.lineWidth = STROKE_SIZE * 1.5;
+  ctx.stroke(splines);
+  await snapshot("Catmull-Rom Splines", canvas);
 }
 
 function resize(canvas: OffscreenCanvas): void {
@@ -99,109 +113,6 @@ function reset(ctx: OffscreenCanvasRenderingContext2D): void {
 function addSegment(path: Path2D, buffer: PointBuffer, source: PointId, target: PointId): void {
   path.moveTo(pointX(buffer, source), pointY(buffer, source));
   path.lineTo(pointX(buffer, target), pointY(buffer, target));
-}
-
-function contourLevels(buffer: PointBuffer, heightmap: Float64Array, count: number): number[] {
-  let min = Number.POSITIVE_INFINITY;
-  let max = Number.NEGATIVE_INFINITY;
-
-  for (const id of pointIds(buffer)) {
-    const x = pointX(buffer, id);
-    const y = pointY(buffer, id);
-    if (x < 0 || x > WIDTH || y < 0 || y > HEIGHT) {
-      continue;
-    }
-
-    const value = heightmap[id];
-    min = Math.min(min, value);
-    max = Math.max(max, value);
-  }
-
-  if (!Number.isFinite(min) || !Number.isFinite(max) || min === max) {
-    return [];
-  }
-
-  const step = (max - min) / (count + 1);
-  return Array.from({ length: count }, (_, index) => min + step * (index + 1));
-}
-
-function addIsolines(path: Path2D, mesh: DualMesh, heightmap: Float64Array, level: number): void {
-  for (const triangle of mesh.triangleIds()) {
-    const [a, b, c] = Array.from(mesh.trianglePoints(triangle));
-    const mask =
-      (heightmap[a] >= level ? 1 : 0) |
-      (heightmap[b] >= level ? 2 : 0) |
-      (heightmap[c] >= level ? 4 : 0);
-
-    switch (mask) {
-      case 0:
-      case 7:
-        break;
-      case 1:
-      case 6:
-        addInterpolatedSegment(path, mesh.points, a, b, c, a, heightmap, level);
-        break;
-      case 2:
-      case 5:
-        addInterpolatedSegment(path, mesh.points, a, b, b, c, heightmap, level);
-        break;
-      case 3:
-      case 4:
-        addInterpolatedSegment(path, mesh.points, b, c, c, a, heightmap, level);
-        break;
-      default:
-        break;
-    }
-  }
-}
-
-function addInterpolatedSegment(
-  path: Path2D,
-  buffer: PointBuffer,
-  sourceA: PointId,
-  targetA: PointId,
-  sourceB: PointId,
-  targetB: PointId,
-  heightmap: Float64Array,
-  level: number,
-): void {
-  const [startX, startY] = interpolateEdge(
-    buffer,
-    sourceA,
-    targetA,
-    heightmap[sourceA],
-    heightmap[targetA],
-    level,
-  );
-  const [endX, endY] = interpolateEdge(
-    buffer,
-    sourceB,
-    targetB,
-    heightmap[sourceB],
-    heightmap[targetB],
-    level,
-  );
-  path.moveTo(startX, startY);
-  path.lineTo(endX, endY);
-}
-
-function interpolateEdge(
-  buffer: PointBuffer,
-  source: PointId,
-  target: PointId,
-  sourceHeight: number,
-  targetHeight: number,
-  level: number,
-): [number, number] {
-  const delta = targetHeight - sourceHeight;
-  const offset = delta === 0 ? 0.5 : (level - sourceHeight) / delta;
-  const x = interpolate(pointX(buffer, source), pointX(buffer, target), offset);
-  const y = interpolate(pointY(buffer, source), pointY(buffer, target), offset);
-  return [x, y];
-}
-
-function interpolate(source: number, target: number, offset: number): number {
-  return source + (target - source) * offset;
 }
 
 async function snapshot(name: string, canvas: OffscreenCanvas): Promise<void> {
