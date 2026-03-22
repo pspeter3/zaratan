@@ -4,6 +4,7 @@ import { effect, signal } from "@preact/signals-core";
 
 import type { OffscreenWorkerCommand } from "./commands";
 import { DualMesh } from "./utils/dual-mesh";
+import { Bounds2D } from "./utils/geometry";
 import { pointX, pointY, type PointBufferLike, type PointId } from "./utils/point-buffer";
 import { poisson } from "./utils/poisson";
 import { createRandom } from "./utils/random";
@@ -52,7 +53,7 @@ function render(): void {
   const rand = createRandom(seed);
   const mesh = new DualMesh(
     poisson({
-      bounds: { min: { x: 0, y: 0 }, max: { x: width, y: height } },
+      bounds: Bounds2D.fromDimensions(width, height),
       radius,
       rand,
     }),
