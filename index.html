@@ -6,7 +6,26 @@
     <title>Zaratan</title>
     <script type="module" src="./src/main.ts"></script>
   </head>
-  <body class="min-h-dvh bg-black">
-    <canvas id="canvas" class="mx-auto max-h-dvh max-w-dvw" role="img"></canvas>
+  <body class="gap-4 bg-stone-50 p-4 md:flex dark:bg-stone-950">
+    <form id="params" class="md:max-w-sm">
+      <label>
+        <span>Seed</span>
+        <input name="seed" type="number" required value="42" inputmode="numeric" />
+      </label>
+      <label>
+        <span>Width</span>
+        <input name="width" type="number" required value="1024" inputmode="numeric" />
+      </label>
+      <label>
+        <span>Height</span>
+        <input name="height" type="number" required value="1024" inputmode="numeric" />
+      </label>
+      <label>
+        <span>Radius</span>
+        <input name="radius" type="number" required value="128" inputmode="numeric" />
+      </label>
+      <button type="submit">Render</button>
+    </form>
+    <canvas id="canvas" class="w-full" role="img"></canvas>
   </body>
 </html>
