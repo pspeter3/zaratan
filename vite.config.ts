@@ -18,6 +18,7 @@ export default defineConfig({
       "no-plusplus": "off",
       "no-bitwise": "off",
       "no-undefined": "off",
+      "default-case": "off",
     },
   },
   plugins: [tailwindcss()],

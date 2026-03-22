@@ -1,36 +1,59 @@
 /// <reference lib="webworker" />
 
+import { effect, signal } from "@preact/signals-core";
+
+import type { OffscreenWorkerCommand } from "./commands";
 import { DualMesh } from "./utils/dual-mesh";
 import { pointX, pointY, type PointBufferLike, type PointId } from "./utils/point-buffer";
 import { poisson } from "./utils/poisson";
 import { createRandom } from "./utils/random";
 import { Surface2D } from "./utils/surface2d";
+import type { ZaratanParams } from "./zaratan";
 
 export interface OffscreenInitMessage {
   readonly canvas: OffscreenCanvas;
 }
 
-const SIZE = 1024;
-const WIDTH = SIZE;
-const HEIGHT = SIZE;
-const RADIUS = 128;
-const SEED = 1337;
+const surfaceSignal = signal<Surface2D | null>(null);
+const paramsSignal = signal<ZaratanParams | null>(null);
 
 const STROKE_SIZE = 2;
 const FILL_STYLE = "#000";
 const DELAUNAY_STROKE_STYLE = "#505050";
 const DUAL_STROKE_STYLE = "#fff";
 
-addEventListener("message", render);
+addEventListener("message", onMessage);
+effect(render);
 
-function render({ data: { canvas } }: MessageEvent<OffscreenInitMessage>): void {
-  const surface = new Surface2D(canvas);
-  surface.resize(WIDTH, HEIGHT);
-  const rand = createRandom(SEED);
+function onMessage({ data }: MessageEvent<OffscreenWorkerCommand>): void {
+  switch (data.kind) {
+    case "init": {
+      surfaceSignal.value = new Surface2D(data.canvas);
+      break;
+    }
+    case "submit": {
+      paramsSignal.value = data.params;
+      break;
+    }
+  }
+}
+
+function render(): void {
+  const surface = surfaceSignal.value;
+  if (surface === null) {
+    return;
+  }
+  const params = paramsSignal.value;
+  if (params === null) {
+    return;
+  }
+  const { width, height, radius, seed } = params;
+  surface.resize(width, height);
+  const rand = createRandom(seed);
   const mesh = new DualMesh(
     poisson({
-      bounds: { min: { x: 0, y: 0 }, max: { x: WIDTH, y: HEIGHT } },
-      radius: RADIUS,
+      bounds: { min: { x: 0, y: 0 }, max: { x: width, y: height } },
+      radius,
       rand,
     }),
   );

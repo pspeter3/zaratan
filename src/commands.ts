@@ -1,10 +1,12 @@
+import type { ZaratanParams } from "./zaratan";
+
 /**
- * Discriminant identifying the command sent to the offscreen worker.
+ * Discriminant identifying the message sent to the Zaratan offscreen worker.
  */
 export type CommandKind = "init" | "submit";
 
 /**
- * Base shape shared by all offscreen worker commands.
+ * Base shape shared by all Zaratan worker commands.
  *
  * @typeParam K - The specific command discriminant.
  */
@@ -14,7 +16,7 @@ export interface AbstractCommand<K extends CommandKind> {
 }
 
 /**
- * Command that transfers the rendering canvas to the worker.
+ * Message that transfers the destination canvas to the worker.
  */
 export interface InitCommand extends AbstractCommand<"init"> {
   /** Offscreen canvas the worker should render into. */
@@ -22,22 +24,14 @@ export interface InitCommand extends AbstractCommand<"init"> {
 }
 
 /**
- * Command that requests a new render using the provided generation settings.
+ * Message that requests a render using a complete Zaratan parameter set.
  */
 export interface SubmitCommand extends AbstractCommand<"submit"> {
-  /** Seed used to initialize the random number generator. */
-  readonly seed: number;
-  /** Width of the generated output in pixels. */
-  readonly width: number;
-  /** Height of the generated output in pixels. */
-  readonly height: number;
-  /** Minimum spacing between generated sample points. */
-  readonly radius: number;
-  /** Number of candidate attempts per active sample. */
-  readonly tries: number;
+  /** Rendering and generation settings applied to the next worker render. */
+  readonly params: ZaratanParams;
 }
 
 /**
- * Any command accepted by the offscreen worker.
+ * Any message accepted by the Zaratan offscreen worker.
  */
 export type OffscreenWorkerCommand = InitCommand | SubmitCommand;

@@ -7,6 +7,7 @@
     "dev": "vp dev"
   },
   "dependencies": {
+    "@preact/signals-core": "^1.14.0",
     "delaunator": "^5.0.1",
     "fast-2d-poisson-disk-sampling": "^1.0.3",
     "pure-rand": "^8.3.0"
