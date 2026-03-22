@@ -10,11 +10,6 @@ export interface OffscreenInitMessage {
   readonly canvas: OffscreenCanvas;
 }
 
-export interface OffscreenStageMessage {
-  readonly name: string;
-  readonly blob: Blob;
-}
-
 const SIZE = 1024;
 const WIDTH = SIZE;
 const HEIGHT = SIZE;
@@ -28,7 +23,7 @@ const DUAL_STROKE_STYLE = "#fff";
 
 addEventListener("message", render);
 
-async function render({ data: { canvas } }: MessageEvent<OffscreenInitMessage>): Promise<void> {
+function render({ data: { canvas } }: MessageEvent<OffscreenInitMessage>): void {
   const surface = new Surface2D(canvas);
   surface.resize(WIDTH, HEIGHT);
   const rand = createRandom(SEED);
@@ -65,16 +60,9 @@ async function render({ data: { canvas } }: MessageEvent<OffscreenInitMessage>):
     cap: "round",
     join: "round",
   });
-  await snapshot("Dual Mesh", surface);
 }
 
 function addSegment(path: Path2D, buffer: PointBufferLike, source: PointId, target: PointId): void {
   path.moveTo(pointX(buffer, source), pointY(buffer, source));
   path.lineTo(pointX(buffer, target), pointY(buffer, target));
-}
-
-async function snapshot(name: string, surface: Surface2D): Promise<void> {
-  const blob = await surface.snapshot();
-  const message: OffscreenStageMessage = { name, blob };
-  postMessage(message);
 }

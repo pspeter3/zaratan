@@ -315,13 +315,4 @@ describe("Surface2D", () => {
     expect(ctx.lineDashOffset).toBe(0.5);
     expect(ctx.getLineDash()).toEqual(originalDash);
   });
-
-  test("snapshot delegates to the backing canvas", async () => {
-    const blob = new Blob(["result"]);
-    const canvas = new MockCanvas(new MockContext2D(), blob);
-    const surface = new Surface2D(canvas as unknown as OffscreenCanvas);
-
-    await expect(surface.snapshot()).resolves.toBe(blob);
-    expect(canvas.convertToBlobCalls).toBe(1);
-  });
 });

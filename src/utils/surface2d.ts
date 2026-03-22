@@ -57,13 +57,6 @@ export interface Surface2DLike {
    * @param options - The stroke configuration.
    */
   stroke(path: Path2D, options: SurfaceStrokeOptions): void;
-
-  /**
-   * Captures the current surface contents as an image blob.
-   *
-   * @returns A blob containing the rendered image data.
-   */
-  snapshot(): Promise<Blob>;
 }
 
 /**
@@ -139,13 +132,6 @@ export class Surface2D implements Surface2DLike {
       }
       ctx.stroke(path);
     });
-  }
-
-  /**
-   * @inheritdoc
-   */
-  snapshot(): Promise<Blob> {
-    return this.#canvas.convertToBlob();
   }
 
   /**
