@@ -23,7 +23,7 @@
           <label class="flex flex-col gap-1.5">
             <span class="text-sm font-medium text-stone-700 dark:text-stone-300">Seed</span>
             <input
-              class="h-11 w-full rounded-xl border border-stone-300 bg-stone-50 px-3 text-sm text-stone-900 transition outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-500/15 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100 dark:focus:border-teal-400 dark:focus:ring-teal-400/15"
+              class="h-11 w-full rounded-sm border border-stone-300 bg-stone-50 px-3 text-sm text-stone-900 transition outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-500/15 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100 dark:focus:border-teal-400 dark:focus:ring-teal-400/15"
               name="seed"
               type="number"
               required
@@ -34,7 +34,7 @@
           <label class="flex flex-col gap-1.5">
             <span class="text-sm font-medium text-stone-700 dark:text-stone-300">Width</span>
             <input
-              class="h-11 w-full rounded-xl border border-stone-300 bg-stone-50 px-3 text-sm text-stone-900 transition outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-500/15 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100 dark:focus:border-teal-400 dark:focus:ring-teal-400/15"
+              class="h-11 w-full rounded-sm border border-stone-300 bg-stone-50 px-3 text-sm text-stone-900 transition outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-500/15 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100 dark:focus:border-teal-400 dark:focus:ring-teal-400/15"
               name="width"
               type="number"
               required
@@ -45,7 +45,7 @@
           <label class="flex flex-col gap-1.5">
             <span class="text-sm font-medium text-stone-700 dark:text-stone-300">Height</span>
             <input
-              class="h-11 w-full rounded-xl border border-stone-300 bg-stone-50 px-3 text-sm text-stone-900 transition outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-500/15 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100 dark:focus:border-teal-400 dark:focus:ring-teal-400/15"
+              class="h-11 w-full rounded-sm border border-stone-300 bg-stone-50 px-3 text-sm text-stone-900 transition outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-500/15 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100 dark:focus:border-teal-400 dark:focus:ring-teal-400/15"
               name="height"
               type="number"
               required
@@ -56,7 +56,7 @@
           <label class="flex flex-col gap-1.5">
             <span class="text-sm font-medium text-stone-700 dark:text-stone-300">Radius</span>
             <input
-              class="h-11 w-full rounded-xl border border-stone-300 bg-stone-50 px-3 text-sm text-stone-900 transition outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-500/15 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100 dark:focus:border-teal-400 dark:focus:ring-teal-400/15"
+              class="h-11 w-full rounded-sm border border-stone-300 bg-stone-50 px-3 text-sm text-stone-900 transition outline-none focus:border-teal-600 focus:ring-4 focus:ring-teal-500/15 dark:border-stone-700 dark:bg-stone-900 dark:text-stone-100 dark:focus:border-teal-400 dark:focus:ring-teal-400/15"
               name="radius"
               type="number"
               required
@@ -68,21 +68,21 @@
         <div class="flex flex-col gap-3">
           <button
             type="submit"
-            class="inline-flex h-11 w-full items-center justify-center rounded-xl bg-teal-500 px-4 text-sm font-semibold text-white transition hover:bg-teal-600 focus-visible:ring-4 focus-visible:ring-teal-500/25 focus-visible:ring-offset-2 focus-visible:ring-offset-stone-100 focus-visible:outline-none active:bg-teal-700 dark:bg-teal-400 dark:hover:bg-teal-500 dark:focus-visible:ring-teal-400/25 dark:focus-visible:ring-offset-stone-950 dark:active:bg-teal-600"
+            class="inline-flex h-11 w-full items-center justify-center rounded-sm bg-teal-500 px-4 text-sm font-semibold text-white transition hover:bg-teal-600 focus-visible:ring-4 focus-visible:ring-teal-500/25 focus-visible:ring-offset-2 focus-visible:ring-offset-stone-100 focus-visible:outline-none active:bg-teal-700 dark:bg-teal-400 dark:hover:bg-teal-500 dark:focus-visible:ring-teal-400/25 dark:focus-visible:ring-offset-stone-950 dark:active:bg-teal-600"
           >
             Render
           </button>
           <button
-            id="copy-image"
+            id="copy"
             type="button"
-            class="inline-flex h-11 w-full items-center justify-center rounded-xl border border-stone-300 bg-stone-50 px-4 text-sm font-medium text-stone-700 transition hover:border-stone-400 hover:bg-stone-100 focus-visible:ring-4 focus-visible:ring-stone-400/20 focus-visible:ring-offset-2 focus-visible:ring-offset-stone-100 focus-visible:outline-none dark:border-stone-700 dark:bg-stone-900 dark:text-stone-200 dark:hover:border-stone-600 dark:hover:bg-stone-800 dark:focus-visible:ring-stone-500/25 dark:focus-visible:ring-offset-stone-950"
+            class="inline-flex h-11 w-full items-center justify-center rounded-sm border border-stone-300 bg-stone-50 px-4 text-sm font-medium text-stone-700 transition hover:border-stone-400 hover:bg-stone-100 focus-visible:ring-4 focus-visible:ring-stone-400/20 focus-visible:ring-offset-2 focus-visible:ring-offset-stone-100 focus-visible:outline-none dark:border-stone-700 dark:bg-stone-900 dark:text-stone-200 dark:hover:border-stone-600 dark:hover:bg-stone-800 dark:focus-visible:ring-stone-500/25 dark:focus-visible:ring-offset-stone-950"
           >
-            Copy image
+            Copy
           </button>
         </div>
       </form>
       <div class="min-w-0 flex-1 pt-2">
-        <canvas id="canvas" class="block w-full max-w-full rounded-2xl" role="img"></canvas>
+        <canvas id="canvas" class="block w-full max-w-full rounded-sm" role="img"></canvas>
       </div>
     </div>
   </body>
