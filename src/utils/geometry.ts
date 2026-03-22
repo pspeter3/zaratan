@@ -325,3 +325,25 @@ export function quadrance(x1: number, y1: number, x2: number, y2: number): numbe
 export function mixPoints(x1: number, y1: number, x2: number, y2: number, t: number): Point2D {
   return new Point2D(mix(x1, x2, t), mix(y1, y2, t));
 }
+
+/**
+ * Returns the arithmetic mean of a non-empty iterable of points.
+ *
+ * @param points - The points to average.
+ * @returns A point whose coordinates are the mean of all input points.
+ * @throws {Error} When `points` is empty.
+ */
+export function centroid(points: Iterable<Point2D>): Point2D {
+  let count = 0;
+  let x = 0;
+  let y = 0;
+  for (const point of points) {
+    count++;
+    x += point.x;
+    y += point.y;
+  }
+  if (count === 0) {
+    throw new Error("Empty iterable");
+  }
+  return new Point2D(x / count, y / count);
+}

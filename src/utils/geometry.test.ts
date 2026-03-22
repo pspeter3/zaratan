@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test";
 
-import { Bounds2D, Point2D, Segment2D, distance, mixPoints, quadrance } from "./geometry";
+import { Bounds2D, Point2D, Segment2D, centroid, distance, mixPoints, quadrance } from "./geometry";
 
 describe("Point2D", () => {
   test("fromTuple", () => {
@@ -193,5 +193,19 @@ describe("mixPoints", () => {
     expect(point).toBeInstanceOf(Point2D);
     expect(point.x).toEqual(2);
     expect(point.y).toEqual(4);
+  });
+});
+
+describe("centroid", () => {
+  test("returns the average point for a non-empty iterable", () => {
+    const point = centroid([new Point2D(0, 0), new Point2D(6, 3), new Point2D(3, 6)]);
+
+    expect(point).toBeInstanceOf(Point2D);
+    expect(point.x).toEqual(3);
+    expect(point.y).toEqual(3);
+  });
+
+  test("throws for an empty iterable", () => {
+    expect(() => centroid([])).toThrow("Empty iterable");
   });
 });
