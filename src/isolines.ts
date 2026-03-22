@@ -159,8 +159,8 @@ function contourSegments(mesh: DualMesh, heightmap: Float64Array, level: number)
   const pointsByKey = new Map<string, ContourPoint>();
   const segments: ContourSegment[] = [];
 
-  for (const triangle of mesh.triangleIds()) {
-    const [a, b, c] = Array.from(mesh.trianglePoints(triangle));
+  for (const node of mesh.nodes.keys()) {
+    const [a, b, c] = Array.from(mesh.nodeTiles(node));
     const mask =
       (heightmap[a] >= level ? 1 : 0) |
       (heightmap[b] >= level ? 2 : 0) |
@@ -171,16 +171,16 @@ function contourSegments(mesh: DualMesh, heightmap: Float64Array, level: number)
     }
 
     if (mask === 1 || mask === 6) {
-      segments.push(contourSegment(mesh.points, a, b, c, a, heightmap, level, pointsByKey));
+      segments.push(contourSegment(mesh.tiles.raw, a, b, c, a, heightmap, level, pointsByKey));
       continue;
     }
 
     if (mask === 2 || mask === 5) {
-      segments.push(contourSegment(mesh.points, a, b, b, c, heightmap, level, pointsByKey));
+      segments.push(contourSegment(mesh.tiles.raw, a, b, b, c, heightmap, level, pointsByKey));
       continue;
     }
 
-    segments.push(contourSegment(mesh.points, b, c, c, a, heightmap, level, pointsByKey));
+    segments.push(contourSegment(mesh.tiles.raw, b, c, c, a, heightmap, level, pointsByKey));
   }
 
   return segments;

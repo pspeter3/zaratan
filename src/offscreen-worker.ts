@@ -5,7 +5,7 @@ import { createNoise2D } from "simplex-noise";
 import { DualMesh } from "./dual-mesh";
 import { addCatmullRomIsolines, addIsolines, contourLevels } from "./isolines";
 import { poisson } from "./poisson";
-import { pointIds, pointX, pointY, type PointBufferLike, type PointId } from "./utils/point-buffer";
+import { pointX, pointY, type PointBufferLike, type PointId } from "./utils/point-buffer";
 import { createRandom } from "./utils/random";
 
 export interface OffscreenInitMessage {
@@ -54,11 +54,11 @@ async function render({ data: { canvas } }: MessageEvent<OffscreenInitMessage>):
     if (opposite !== null && edge > opposite) {
       continue;
     }
-    addSegment(delaunay, mesh.points, mesh.edgeStartPoint(edge), mesh.edgeEndPoint(edge));
+    addSegment(delaunay, mesh.tiles.raw, mesh.edgeStartTile(edge), mesh.edgeEndTile(edge));
     if (opposite === null) {
       continue;
     }
-    addSegment(duals, mesh.corners, DualMesh.edgeTriangle(edge), DualMesh.edgeTriangle(opposite));
+    addSegment(duals, mesh.nodes.raw, DualMesh.edgeNode(edge), DualMesh.edgeNode(opposite));
   }
   ctx.strokeStyle = DELAUNAY_STROKE_STYLE;
   ctx.lineWidth = STROKE_SIZE;
@@ -69,11 +69,11 @@ async function render({ data: { canvas } }: MessageEvent<OffscreenInitMessage>):
   await snapshot("Dual Mesh", canvas);
   reset(ctx);
   const noise = createNoise2D(rand);
-  const heightmap = Float64Array.from(pointIds(mesh.points), (id) =>
-    noise(pointX(mesh.points, id) / SIZE, pointY(mesh.points, id) / SIZE),
+  const heightmap = Float64Array.from(mesh.tiles.keys(), (id) =>
+    noise(pointX(mesh.tiles.raw, id) / SIZE, pointY(mesh.tiles.raw, id) / SIZE),
   );
   const isolines = new Path2D();
-  const levels = contourLevels(mesh.points, heightmap, ISOLINE_COUNT, WIDTH, HEIGHT);
+  const levels = contourLevels(mesh.tiles.raw, heightmap, ISOLINE_COUNT, WIDTH, HEIGHT);
   for (const level of levels) {
     addIsolines(isolines, mesh, heightmap, level);
   }
