@@ -1,3 +1,5 @@
+import { mix } from "./math";
+
 /**
  * A read-only object representation of a 2D point.
  */
@@ -47,6 +49,37 @@ export class Point2D implements Point2DRecord {
   constructor(x: number, y: number) {
     this.x = x;
     this.y = y;
+  }
+
+  /**
+   * Returns the Euclidean distance from this point to another point.
+   *
+   * @param point - The point to measure against.
+   * @returns The distance between the two points.
+   */
+  distance({ x, y }: Point2DRecord): number {
+    return distance(this.x, this.y, x, y);
+  }
+
+  /**
+   * Returns the squared Euclidean distance from this point to another point.
+   *
+   * @param point - The point to measure against.
+   * @returns The squared distance between the two points.
+   */
+  quadrance({ x, y }: Point2DRecord): number {
+    return quadrance(this.x, this.y, x, y);
+  }
+
+  /**
+   * Linearly interpolates from this point to another point.
+   *
+   * @param point - The point returned when `t` is `1`.
+   * @param t - The interpolation factor.
+   * @returns A new point between this point and `point`.
+   */
+  mix({ x, y }: Point2DRecord, t: number): Point2D {
+    return mixPoints(this.x, this.y, x, y, t);
   }
 }
 
@@ -100,4 +133,44 @@ export class Bounds2D {
     this.min = min;
     this.max = max;
   }
+}
+
+/**
+ * Returns the Euclidean distance between two 2D coordinates.
+ *
+ * @param x1 - The first point's x-coordinate.
+ * @param y1 - The first point's y-coordinate.
+ * @param x2 - The second point's x-coordinate.
+ * @param y2 - The second point's y-coordinate.
+ * @returns The distance between the two points.
+ */
+export function distance(x1: number, y1: number, x2: number, y2: number): number {
+  return Math.hypot(x2 - x1, y2 - y1);
+}
+
+/**
+ * Returns the squared Euclidean distance between two 2D coordinates.
+ *
+ * @param x1 - The first point's x-coordinate.
+ * @param y1 - The first point's y-coordinate.
+ * @param x2 - The second point's x-coordinate.
+ * @param y2 - The second point's y-coordinate.
+ * @returns The squared distance between the two points.
+ */
+export function quadrance(x1: number, y1: number, x2: number, y2: number): number {
+  return Math.pow(x2 - x1, 2) + Math.pow(y2 - y1, 2);
+}
+
+/**
+ * Linearly interpolates between two 2D coordinates.
+ *
+ * @param x1 - The first point's x-coordinate.
+ * @param y1 - The first point's y-coordinate.
+ * @param x2 - The second point's x-coordinate.
+ * @param y2 - The second point's y-coordinate.
+ * @param t - The interpolation factor.
+ * @returns A new point between the two coordinates.
+ */
+export function mixPoints(x1: number, y1: number, x2: number, y2: number, t: number): Point2D {
+  return new Point2D(mix(x1, x2, t), mix(y1, y2, t));
 }
