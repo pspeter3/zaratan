@@ -1,5 +1,5 @@
 import { DualMesh } from "./dual-mesh";
-import type { Point2D } from "./utils/geometry";
+import type { Point2DRecord } from "./utils/geometry";
 import { pointIds, pointX, pointY, type PointBuffer, type PointId } from "./utils/point-buffer";
 
 export interface PathBuilder {
@@ -8,7 +8,7 @@ export interface PathBuilder {
   closePath?(): void;
 }
 
-export interface ContourPoint extends Point2D {
+export interface ContourPoint extends Point2DRecord {
   readonly key: string;
 }
 
@@ -113,7 +113,7 @@ export function assembleContourLines(segments: readonly ContourSegment[]): Conto
 
 export function addCatmullRomSpline(
   path: PathBuilder,
-  points: readonly Point2D[],
+  points: readonly Point2DRecord[],
   closed: boolean,
 ): void {
   if (points.length < 2) {
@@ -339,7 +339,11 @@ function nextUnusedSegment(
   return null;
 }
 
-function catmullRomPoint(points: readonly Point2D[], index: number, closed: boolean): Point2D {
+function catmullRomPoint(
+  points: readonly Point2DRecord[],
+  index: number,
+  closed: boolean,
+): Point2DRecord {
   if (closed) {
     const wrapped = ((index % points.length) + points.length) % points.length;
     return points[wrapped];
@@ -356,15 +360,15 @@ function catmullRomPoint(points: readonly Point2D[], index: number, closed: bool
   return points[index];
 }
 
-function resampleOpenContour(points: readonly Point2D[]): Point2D[] {
+function resampleOpenContour(points: readonly Point2DRecord[]): Point2DRecord[] {
   return resampleContour(points, false);
 }
 
-function resampleClosedContour(points: readonly Point2D[]): Point2D[] {
+function resampleClosedContour(points: readonly Point2DRecord[]): Point2DRecord[] {
   return resampleContour(points, true);
 }
 
-function resampleContour(points: readonly Point2D[], closed: boolean): Point2D[] {
+function resampleContour(points: readonly Point2DRecord[], closed: boolean): Point2DRecord[] {
   const segmentLengths = contourSegmentLengths(points, closed);
   const totalLength = segmentLengths.reduce((sum, length) => sum + length, 0);
   if (totalLength === 0) {
@@ -377,7 +381,7 @@ function resampleContour(points: readonly Point2D[], closed: boolean): Point2D[]
   );
   const step = Math.max(targetStep, PARAMETER_EPSILON);
 
-  const resampled: Point2D[] = [{ x: points[0].x, y: points[0].y }];
+  const resampled: Point2DRecord[] = [{ x: points[0].x, y: points[0].y }];
   let segmentIndex = 0;
   let traversed = 0;
   let nextDistance = step;
@@ -411,24 +415,24 @@ function resampleContour(points: readonly Point2D[], closed: boolean): Point2D[]
   return resampled;
 }
 
-function contourSegmentLengths(points: readonly Point2D[], closed: boolean): number[] {
+function contourSegmentLengths(points: readonly Point2DRecord[], closed: boolean): number[] {
   const segmentCount = closed ? points.length : points.length - 1;
   return Array.from({ length: segmentCount }, (_, index) =>
     distance(points[index], points[(index + 1) % points.length]),
   );
 }
 
-function splineSubdivisionCount(source: Point2D, target: Point2D): number {
+function splineSubdivisionCount(source: Point2DRecord, target: Point2DRecord): number {
   return Math.max(3, Math.ceil(distance(source, target) / SPLINE_SEGMENT_PIXELS));
 }
 
 function sampleCentripetalCatmullRom(
-  p0: Point2D,
-  p1: Point2D,
-  p2: Point2D,
-  p3: Point2D,
+  p0: Point2DRecord,
+  p1: Point2DRecord,
+  p2: Point2DRecord,
+  p3: Point2DRecord,
   offset: number,
-): Point2D {
+): Point2DRecord {
   const t0 = 0;
   const t1 = t0 + parameterStep(p0, p1);
   const t2 = t1 + parameterStep(p1, p2);
@@ -443,17 +447,17 @@ function sampleCentripetalCatmullRom(
   return interpolatePoint(b1, b2, t1, t2, t);
 }
 
-function parameterStep(source: Point2D, target: Point2D): number {
+function parameterStep(source: Point2DRecord, target: Point2DRecord): number {
   return Math.max(Math.pow(distance(source, target), CATMULL_ROM_ALPHA), PARAMETER_EPSILON);
 }
 
 function interpolatePoint(
-  source: Point2D,
-  target: Point2D,
+  source: Point2DRecord,
+  target: Point2DRecord,
   start: number,
   end: number,
   offset: number,
-): Point2D {
+): Point2DRecord {
   if (Math.abs(end - start) <= PARAMETER_EPSILON) {
     return { x: target.x, y: target.y };
   }
@@ -465,13 +469,13 @@ function interpolatePoint(
   };
 }
 
-function extrapolatePoint(source: Point2D, anchor: Point2D): Point2D {
+function extrapolatePoint(source: Point2DRecord, anchor: Point2DRecord): Point2DRecord {
   return {
     x: anchor.x * 2 - source.x,
     y: anchor.y * 2 - source.y,
   };
 }
 
-function distance(source: Point2D, target: Point2D): number {
+function distance(source: Point2DRecord, target: Point2DRecord): number {
   return Math.hypot(target.x - source.x, target.y - source.y);
 }

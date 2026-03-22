@@ -1,24 +1,24 @@
 import { expect, test } from "vite-plus/test";
 
 import { poisson } from "./poisson";
-import type { Bounds2D, Point2D } from "./utils/geometry";
+import type { Bounds2DRecord, Point2DRecord } from "./utils/geometry";
 import { pointIds, pointX, pointY } from "./utils/point-buffer";
 import { createRandom } from "./utils/random";
 
 const EPSILON = 1e-9;
 
-function distance(source: Point2D, target: Point2D): number {
+function distance(source: Point2DRecord, target: Point2DRecord): number {
   return Math.hypot(target.x - source.x, target.y - source.y);
 }
 
-function toPoints(buffer: Float64Array): Point2D[] {
+function toPoints(buffer: Float64Array): Point2DRecord[] {
   return Array.from(pointIds(buffer), (id) => ({
     x: pointX(buffer, id),
     y: pointY(buffer, id),
   }));
 }
 
-function isWithinBounds(point: Point2D, bounds: Bounds2D, epsilon = EPSILON): boolean {
+function isWithinBounds(point: Point2DRecord, bounds: Bounds2DRecord, epsilon = EPSILON): boolean {
   return (
     point.x >= bounds.min.x - epsilon &&
     point.x <= bounds.max.x + epsilon &&
@@ -27,14 +27,14 @@ function isWithinBounds(point: Point2D, bounds: Bounds2D, epsilon = EPSILON): bo
   );
 }
 
-function buildInnerBoundary(bounds: Bounds2D, radius: number): Point2D[] {
-  const corners: Point2D[] = [
+function buildInnerBoundary(bounds: Bounds2DRecord, radius: number): Point2DRecord[] {
+  const corners: Point2DRecord[] = [
     { x: bounds.min.x, y: bounds.min.y },
     { x: bounds.max.x, y: bounds.min.y },
     { x: bounds.max.x, y: bounds.max.y },
     { x: bounds.min.x, y: bounds.max.y },
   ];
-  const boundary: Point2D[] = [];
+  const boundary: Point2DRecord[] = [];
 
   for (let i = 0; i < corners.length; i++) {
     const source = corners[i];
@@ -53,8 +53,8 @@ function buildInnerBoundary(bounds: Bounds2D, radius: number): Point2D[] {
   return boundary;
 }
 
-function buildOuterBoundary(innerBoundary: readonly Point2D[]): Point2D[] {
-  const boundary: Point2D[] = [];
+function buildOuterBoundary(innerBoundary: readonly Point2DRecord[]): Point2DRecord[] {
+  const boundary: Point2DRecord[] = [];
 
   for (let i = 0; i < innerBoundary.length; i++) {
     const source = innerBoundary[i];
@@ -72,7 +72,7 @@ function buildOuterBoundary(innerBoundary: readonly Point2D[]): Point2D[] {
   return boundary;
 }
 
-function closeToPoint(point: Point2D): ReturnType<typeof expect.objectContaining> {
+function closeToPoint(point: Point2DRecord): ReturnType<typeof expect.objectContaining> {
   return expect.objectContaining({
     x: expect.closeTo(point.x, 9),
     y: expect.closeTo(point.y, 9),
@@ -84,7 +84,7 @@ function expectPoissonBoundary({
   radius,
   seed,
 }: {
-  readonly bounds: Bounds2D;
+  readonly bounds: Bounds2DRecord;
   readonly radius: number;
   readonly seed: number;
 }): void {
@@ -115,7 +115,7 @@ function expectPoissonBoundary({
 }
 
 test("poisson", () => {
-  const bounds: Bounds2D = {
+  const bounds: Bounds2DRecord = {
     min: { x: 0, y: 0 },
     max: { x: 1, y: 1 },
   };

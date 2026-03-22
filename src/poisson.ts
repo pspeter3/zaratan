@@ -2,13 +2,13 @@ import FastPoissonDiskSampling, {
   type FastPoissonDiskSamplingPoint,
 } from "fast-2d-poisson-disk-sampling";
 
-import type { Bounds2D } from "./utils/geometry";
+import type { Bounds2DRecord } from "./utils/geometry";
 import type { Random } from "./utils/random";
 
 const EQUILATERAL = Math.sqrt(3) / 2;
 
 export interface PoissonParams {
-  readonly bounds: Bounds2D;
+  readonly bounds: Bounds2DRecord;
   readonly radius: number;
   readonly tries?: number;
   readonly rand?: Random;
