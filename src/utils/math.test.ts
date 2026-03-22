@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vite-plus/test";
 
-import { mix } from "./math";
+import { clamp, mix } from "./math";
 
 describe("mix", () => {
   test("returns a for t=0", () => {
@@ -13,5 +13,19 @@ describe("mix", () => {
 
   test("returns mid point for t=0.5", () => {
     expect(mix(1.5, 2.5, 0.5)).toEqual(2);
+  });
+});
+
+describe("clamp", () => {
+  test("returns min when value less than min", () => {
+    expect(clamp(-0.5, 0, 1)).toEqual(0);
+  });
+
+  test("returns max when value greater than max", () => {
+    expect(clamp(1.5, 0, 1)).toEqual(1);
+  });
+
+  test("returns value when in range", () => {
+    expect(clamp(0.5, 0, 1)).toEqual(0.5);
   });
 });
