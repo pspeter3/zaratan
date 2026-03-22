@@ -1,7 +1,7 @@
 import { expect, test } from "vite-plus/test";
 
 import { DualMesh, type EdgeId, type NodeId, type TileId } from "./dual-mesh";
-import { pointX, pointY } from "./utils/point-buffer";
+import { pointX, pointY } from "./point-buffer";
 
 function asTileId(value: number): TileId {
   return value as TileId;

@@ -2,8 +2,8 @@ import FastPoissonDiskSampling, {
   type FastPoissonDiskSamplingPoint,
 } from "fast-2d-poisson-disk-sampling";
 
-import type { Bounds2DRecord } from "./utils/geometry";
-import type { Random } from "./utils/random";
+import type { Bounds2DRecord } from "./geometry";
+import type { Random } from "./random";
 
 const EQUILATERAL = Math.sqrt(3) / 2;
 

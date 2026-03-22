@@ -1,9 +1,9 @@
 import { expect, test } from "vite-plus/test";
 
+import { Bounds2D, Point2D } from "./geometry";
+import { pointIds, pointX, pointY } from "./point-buffer";
 import { poisson } from "./poisson";
-import { Bounds2D, Point2D } from "./utils/geometry";
-import { pointIds, pointX, pointY } from "./utils/point-buffer";
-import { createRandom } from "./utils/random";
+import { createRandom } from "./random";
 
 const EPSILON = 1e-9;
 

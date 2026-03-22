@@ -1,7 +1,7 @@
 import Delaunator from "delaunator";
 
-import type { Brand } from "./utils/brand";
-import { PointBuffer, pointX, pointY, type PointId } from "./utils/point-buffer";
+import type { Brand } from "./brand";
+import { PointBuffer, pointX, pointY, type PointId } from "./point-buffer";
 
 /**
  * Branded id for a primal-mesh tile stored in {@link DualMesh.tiles}.
