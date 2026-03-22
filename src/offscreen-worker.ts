@@ -1,8 +1,8 @@
 /// <reference lib="webworker" />
 
-import { DualMesh } from "./dual-mesh";
-import { poisson } from "./poisson";
+import { DualMesh } from "./utils/dual-mesh";
 import { pointX, pointY, type PointBufferLike, type PointId } from "./utils/point-buffer";
+import { poisson } from "./utils/poisson";
 import { createRandom } from "./utils/random";
 import { Surface2D } from "./utils/surface2d";
 
