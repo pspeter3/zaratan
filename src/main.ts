@@ -17,7 +17,14 @@ worker.addEventListener("message", addStage);
 
 function addStage({ data: { name, blob } }: MessageEvent<OffscreenStageMessage>): void {
   const item = document.importNode(itemTmpl.content, true);
-  item.querySelector("figcaption")!.textContent = name;
-  item.querySelector("img")!.src = URL.createObjectURL(blob);
+  const caption = item.querySelector("figcaption");
+  const image = item.querySelector("img");
+
+  if (caption === null || image === null) {
+    throw new Error("Item template is missing required elements.");
+  }
+
+  caption.textContent = name;
+  image.src = URL.createObjectURL(blob);
   list.appendChild(item);
 }

@@ -1,6 +1,6 @@
 import { DualMesh } from "./dual-mesh";
-import type { Point2D } from "./utils/geometry";
-import { pointIds, pointX, pointY, type PointBuffer, type PointId } from "./utils/point-buffer";
+import { Point2D } from "./utils/geometry";
+import { pointIds, pointX, pointY, type PointBufferLike, type PointId } from "./utils/point-buffer";
 
 export interface PathBuilder {
   moveTo(x: number, y: number): void;
@@ -27,7 +27,7 @@ const SPLINE_SEGMENT_PIXELS = 12;
 const PARAMETER_EPSILON = 1e-6;
 
 export function contourLevels(
-  buffer: PointBuffer,
+  buffer: PointBufferLike,
   heightmap: Float64Array,
   count: number,
   width: number,
@@ -159,37 +159,35 @@ function contourSegments(mesh: DualMesh, heightmap: Float64Array, level: number)
   const pointsByKey = new Map<string, ContourPoint>();
   const segments: ContourSegment[] = [];
 
-  for (const triangle of mesh.triangleIds()) {
-    const [a, b, c] = Array.from(mesh.trianglePoints(triangle));
+  for (const node of mesh.nodes.keys()) {
+    const [a, b, c] = Array.from(mesh.nodeTiles(node));
     const mask =
       (heightmap[a] >= level ? 1 : 0) |
       (heightmap[b] >= level ? 2 : 0) |
       (heightmap[c] >= level ? 4 : 0);
 
-    switch (mask) {
-      case 0:
-      case 7:
-        break;
-      case 1:
-      case 6:
-        segments.push(contourSegment(mesh.points, a, b, c, a, heightmap, level, pointsByKey));
-        break;
-      case 2:
-      case 5:
-        segments.push(contourSegment(mesh.points, a, b, b, c, heightmap, level, pointsByKey));
-        break;
-      case 3:
-      case 4:
-        segments.push(contourSegment(mesh.points, b, c, c, a, heightmap, level, pointsByKey));
-        break;
+    if (mask === 0 || mask === 7) {
+      continue;
     }
+
+    if (mask === 1 || mask === 6) {
+      segments.push(contourSegment(mesh.tiles.raw, a, b, c, a, heightmap, level, pointsByKey));
+      continue;
+    }
+
+    if (mask === 2 || mask === 5) {
+      segments.push(contourSegment(mesh.tiles.raw, a, b, b, c, heightmap, level, pointsByKey));
+      continue;
+    }
+
+    segments.push(contourSegment(mesh.tiles.raw, b, c, c, a, heightmap, level, pointsByKey));
   }
 
   return segments;
 }
 
 function contourSegment(
-  buffer: PointBuffer,
+  buffer: PointBufferLike,
   sourceA: PointId,
   targetA: PointId,
   sourceB: PointId,
@@ -221,7 +219,7 @@ function contourSegment(
 }
 
 function contourPoint(
-  buffer: PointBuffer,
+  buffer: PointBufferLike,
   source: PointId,
   target: PointId,
   sourceHeight: number,
@@ -235,8 +233,10 @@ function contourPoint(
     return existing;
   }
 
-  const [x, y] = interpolateEdge(buffer, source, target, sourceHeight, targetHeight, level);
-  const point: ContourPoint = { key, x, y };
+  const point = Object.assign(
+    interpolateEdge(buffer, source, target, sourceHeight, targetHeight, level),
+    { key },
+  ) as ContourPoint;
   pointsByKey.set(key, point);
   return point;
 }
@@ -246,18 +246,18 @@ function edgeKey(source: PointId, target: PointId): string {
 }
 
 function interpolateEdge(
-  buffer: PointBuffer,
+  buffer: PointBufferLike,
   source: PointId,
   target: PointId,
   sourceHeight: number,
   targetHeight: number,
   level: number,
-): [number, number] {
+): Point2D {
   const delta = targetHeight - sourceHeight;
   const offset = (level - sourceHeight) / delta;
-  const x = interpolate(pointX(buffer, source), pointX(buffer, target), offset);
-  const y = interpolate(pointY(buffer, source), pointY(buffer, target), offset);
-  return [x, y];
+  const sourcePoint = point(buffer, source);
+  const targetPoint = point(buffer, target);
+  return sourcePoint.segmentTo(targetPoint).mix(offset);
 }
 
 function interpolate(source: number, target: number, offset: number): number {
@@ -375,7 +375,7 @@ function resampleContour(points: readonly Point2D[], closed: boolean): Point2D[]
   );
   const step = Math.max(targetStep, PARAMETER_EPSILON);
 
-  const resampled: Point2D[] = [{ x: points[0].x, y: points[0].y }];
+  const resampled: Point2D[] = [Point2D.fromRecord(points[0])];
   let segmentIndex = 0;
   let traversed = 0;
   let nextDistance = step;
@@ -388,15 +388,12 @@ function resampleContour(points: readonly Point2D[], closed: boolean): Point2D[]
       segmentIndex++;
     }
 
-    const segmentLength = segmentLengths[segmentIndex];
     const start = points[segmentIndex];
     const end = points[(segmentIndex + 1) % points.length];
+    const segment = start.segmentTo(end);
     const offset =
-      segmentLength <= PARAMETER_EPSILON ? 0 : (nextDistance - traversed) / segmentLength;
-    resampled.push({
-      x: interpolate(start.x, end.x, offset),
-      y: interpolate(start.y, end.y, offset),
-    });
+      segment.length <= PARAMETER_EPSILON ? 0 : (nextDistance - traversed) / segment.length;
+    resampled.push(segment.mix(offset));
     nextDistance += step;
   }
 
@@ -405,19 +402,20 @@ function resampleContour(points: readonly Point2D[], closed: boolean): Point2D[]
   }
 
   const last = points[points.length - 1];
-  resampled.push({ x: last.x, y: last.y });
+  resampled.push(Point2D.fromRecord(last));
   return resampled;
 }
 
 function contourSegmentLengths(points: readonly Point2D[], closed: boolean): number[] {
   const segmentCount = closed ? points.length : points.length - 1;
-  return Array.from({ length: segmentCount }, (_, index) =>
-    distance(points[index], points[(index + 1) % points.length]),
+  return Array.from(
+    { length: segmentCount },
+    (_, index) => points[index].segmentTo(points[(index + 1) % points.length]).length,
   );
 }
 
 function splineSubdivisionCount(source: Point2D, target: Point2D): number {
-  return Math.max(3, Math.ceil(distance(source, target) / SPLINE_SEGMENT_PIXELS));
+  return Math.max(3, Math.ceil(source.distance(target) / SPLINE_SEGMENT_PIXELS));
 }
 
 function sampleCentripetalCatmullRom(
@@ -442,7 +440,7 @@ function sampleCentripetalCatmullRom(
 }
 
 function parameterStep(source: Point2D, target: Point2D): number {
-  return Math.max(Math.pow(distance(source, target), CATMULL_ROM_ALPHA), PARAMETER_EPSILON);
+  return Math.max(Math.pow(source.distance(target), CATMULL_ROM_ALPHA), PARAMETER_EPSILON);
 }
 
 function interpolatePoint(
@@ -453,23 +451,17 @@ function interpolatePoint(
   offset: number,
 ): Point2D {
   if (Math.abs(end - start) <= PARAMETER_EPSILON) {
-    return { x: target.x, y: target.y };
+    return target;
   }
 
   const ratio = (offset - start) / (end - start);
-  return {
-    x: interpolate(source.x, target.x, ratio),
-    y: interpolate(source.y, target.y, ratio),
-  };
+  return source.mix(target, ratio);
 }
 
 function extrapolatePoint(source: Point2D, anchor: Point2D): Point2D {
-  return {
-    x: anchor.x * 2 - source.x,
-    y: anchor.y * 2 - source.y,
-  };
+  return anchor.mix(source, -1);
 }
 
-function distance(source: Point2D, target: Point2D): number {
-  return Math.hypot(target.x - source.x, target.y - source.y);
+function point(buffer: PointBufferLike, id: PointId): Point2D {
+  return new Point2D(pointX(buffer, id), pointY(buffer, id));
 }

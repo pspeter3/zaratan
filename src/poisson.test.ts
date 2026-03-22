@@ -1,52 +1,32 @@
 import { expect, test } from "vite-plus/test";
 
 import { poisson } from "./poisson";
-import type { Bounds2D, Point2D } from "./utils/geometry";
+import { Bounds2D, Point2D } from "./utils/geometry";
 import { pointIds, pointX, pointY } from "./utils/point-buffer";
 import { createRandom } from "./utils/random";
 
 const EPSILON = 1e-9;
 
-function distance(source: Point2D, target: Point2D): number {
-  return Math.hypot(target.x - source.x, target.y - source.y);
-}
-
 function toPoints(buffer: Float64Array): Point2D[] {
-  return Array.from(pointIds(buffer), (id) => ({
-    x: pointX(buffer, id),
-    y: pointY(buffer, id),
-  }));
-}
-
-function isWithinBounds(point: Point2D, bounds: Bounds2D, epsilon = EPSILON): boolean {
-  return (
-    point.x >= bounds.min.x - epsilon &&
-    point.x <= bounds.max.x + epsilon &&
-    point.y >= bounds.min.y - epsilon &&
-    point.y <= bounds.max.y + epsilon
-  );
+  return Array.from(pointIds(buffer), (id) => new Point2D(pointX(buffer, id), pointY(buffer, id)));
 }
 
 function buildInnerBoundary(bounds: Bounds2D, radius: number): Point2D[] {
   const corners: Point2D[] = [
-    { x: bounds.min.x, y: bounds.min.y },
-    { x: bounds.max.x, y: bounds.min.y },
-    { x: bounds.max.x, y: bounds.max.y },
-    { x: bounds.min.x, y: bounds.max.y },
+    bounds.min,
+    new Point2D(bounds.max.x, bounds.min.y),
+    bounds.max,
+    new Point2D(bounds.min.x, bounds.max.y),
   ];
   const boundary: Point2D[] = [];
 
   for (let i = 0; i < corners.length; i++) {
     const source = corners[i];
     const target = corners[(i + 1) % corners.length];
-    const segments = Math.max(1, Math.floor(distance(source, target) / radius));
-    const dx = (target.x - source.x) / segments;
-    const dy = (target.y - source.y) / segments;
+    const edge = source.segmentTo(target);
+    const segments = Math.max(1, Math.floor(edge.length / radius));
     for (let step = 0; step < segments; step++) {
-      boundary.push({
-        x: source.x + dx * step,
-        y: source.y + dy * step,
-      });
+      boundary.push(edge.mix(step / segments));
     }
   }
 
@@ -59,14 +39,17 @@ function buildOuterBoundary(innerBoundary: readonly Point2D[]): Point2D[] {
   for (let i = 0; i < innerBoundary.length; i++) {
     const source = innerBoundary[i];
     const target = innerBoundary[(i + 1) % innerBoundary.length];
+    const edge = source.segmentTo(target);
     const dx = target.x - source.x;
     const dy = target.y - source.y;
-    const edgeLength = Math.hypot(dx, dy);
-    const height = (edgeLength * Math.sqrt(3)) / 2;
-    boundary.push({
-      x: (source.x + target.x) / 2 + (dy / edgeLength) * height,
-      y: (source.y + target.y) / 2 - (dx / edgeLength) * height,
-    });
+    const height = (edge.length * Math.sqrt(3)) / 2;
+    const midpoint = edge.mix(0.5);
+    boundary.push(
+      new Point2D(
+        midpoint.x + (dy / edge.length) * height,
+        midpoint.y - (dx / edge.length) * height,
+      ),
+    );
   }
 
   return boundary;
@@ -92,7 +75,7 @@ function expectPoissonBoundary({
   const points = toPoints(buffer);
   const innerBoundary = buildInnerBoundary(bounds, radius);
   const outerBoundary = buildOuterBoundary(innerBoundary);
-  const outsideBounds = points.filter((point) => !isWithinBounds(point, bounds));
+  const outsideBounds = points.filter((point) => !bounds.contains(point));
 
   expect(innerBoundary).toEqual(
     expect.arrayContaining([
@@ -109,16 +92,13 @@ function expectPoissonBoundary({
 
   for (let i = 0; i < points.length; i++) {
     for (let j = i + 1; j < points.length; j++) {
-      expect(distance(points[i], points[j])).toBeGreaterThanOrEqual(radius - EPSILON);
+      expect(points[i].distance(points[j])).toBeGreaterThanOrEqual(radius - EPSILON);
     }
   }
 }
 
 test("poisson", () => {
-  const bounds: Bounds2D = {
-    min: { x: 0, y: 0 },
-    max: { x: 1, y: 1 },
-  };
+  const bounds = new Bounds2D(new Point2D(0, 0), new Point2D(1, 1));
   const radius = 0.125;
 
   expect(buildInnerBoundary(bounds, radius)).toHaveLength(32);
@@ -127,10 +107,7 @@ test("poisson", () => {
 
 test("poisson keeps sampler points within bounds", () => {
   expectPoissonBoundary({
-    bounds: {
-      min: { x: 0, y: 0 },
-      max: { x: 1.49, y: 1.49 },
-    },
+    bounds: new Bounds2D(new Point2D(0, 0), new Point2D(1.49, 1.49)),
     radius: 1,
     seed: 3,
   });

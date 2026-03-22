@@ -11,6 +11,7 @@ import {
   type ContourSegment,
   type PathBuilder,
 } from "./isolines";
+import { Point2D } from "./utils/geometry";
 
 type PathCommand =
   | { readonly type: "moveTo"; readonly x: number; readonly y: number }
@@ -34,7 +35,7 @@ class RecordingPath implements PathBuilder {
 }
 
 function point(key: string, x: number, y: number): ContourPoint {
-  return { key, x, y };
+  return Object.assign(new Point2D(x, y), { key }) as ContourPoint;
 }
 
 function segment(start: ContourPoint, end: ContourPoint): ContourSegment {
@@ -51,15 +52,17 @@ function binaryHeightmap(bits: number): Float64Array {
 
 function unstablePoint(keys: readonly string[], x: number, y: number): ContourPoint {
   let index = 0;
-  return {
-    get key() {
+  const point = new Point2D(x, y) as ContourPoint;
+  Object.defineProperty(point, "key", {
+    configurable: true,
+    enumerable: true,
+    get() {
       const current = keys[Math.min(index, keys.length - 1)];
       index++;
       return current;
     },
-    x,
-    y,
-  } as ContourPoint;
+  });
+  return point;
 }
 
 test("contourLevels skips out-of-bounds points and spaces levels across the interior range", () => {
@@ -193,7 +196,7 @@ test("assembleContourLines returns an open line when a loop cannot continue", ()
 test("addCatmullRomSpline ignores contours shorter than two points", () => {
   const path = new RecordingPath();
 
-  addCatmullRomSpline(path, [{ x: 0, y: 0 }], false);
+  addCatmullRomSpline(path, [new Point2D(0, 0)], false);
 
   expect(path.commands).toEqual([]);
 });
@@ -201,14 +204,7 @@ test("addCatmullRomSpline ignores contours shorter than two points", () => {
 test("addCatmullRomSpline falls back to straight segments for a line", () => {
   const path = new RecordingPath();
 
-  addCatmullRomSpline(
-    path,
-    [
-      { x: 0, y: 0 },
-      { x: 2, y: 1 },
-    ],
-    false,
-  );
+  addCatmullRomSpline(path, [new Point2D(0, 0), new Point2D(2, 1)], false);
 
   expect(path.commands).toEqual([
     { type: "moveTo", x: 0, y: 0 },
@@ -219,14 +215,7 @@ test("addCatmullRomSpline falls back to straight segments for a line", () => {
 test("addCatmullRomSpline closes two-point contours without smoothing", () => {
   const path = new RecordingPath();
 
-  addCatmullRomSpline(
-    path,
-    [
-      { x: 0, y: 0 },
-      { x: 2, y: 1 },
-    ],
-    true,
-  );
+  addCatmullRomSpline(path, [new Point2D(0, 0), new Point2D(2, 1)], true);
 
   expect(path.commands).toEqual([
     { type: "moveTo", x: 0, y: 0 },
@@ -240,12 +229,7 @@ test("addCatmullRomSpline samples smooth segments for open contours", () => {
 
   addCatmullRomSpline(
     path,
-    [
-      { x: 0, y: 0 },
-      { x: 1, y: 1 },
-      { x: 2, y: 1 },
-      { x: 3, y: 0 },
-    ],
+    [new Point2D(0, 0), new Point2D(1, 1), new Point2D(2, 1), new Point2D(3, 0)],
     false,
   );
 
@@ -257,15 +241,7 @@ test("addCatmullRomSpline samples smooth segments for open contours", () => {
 test("addCatmullRomSpline closes spline loops", () => {
   const path = new RecordingPath();
 
-  addCatmullRomSpline(
-    path,
-    [
-      { x: 0, y: 0 },
-      { x: 2, y: 0 },
-      { x: 1, y: 2 },
-    ],
-    true,
-  );
+  addCatmullRomSpline(path, [new Point2D(0, 0), new Point2D(2, 0), new Point2D(1, 2)], true);
 
   expect(path.commands[0]).toEqual({ type: "moveTo", x: 0, y: 0 });
   const lineSegments = path.commands.filter(({ type }) => type === "lineTo");
@@ -277,15 +253,7 @@ test("addCatmullRomSpline closes spline loops", () => {
 test("addCatmullRomSpline returns early when a tiny closed contour collapses during resampling", () => {
   const path = new RecordingPath();
 
-  addCatmullRomSpline(
-    path,
-    [
-      { x: 0, y: 0 },
-      { x: 1e-8, y: 0 },
-      { x: 2e-8, y: 0 },
-    ],
-    true,
-  );
+  addCatmullRomSpline(path, [new Point2D(0, 0), new Point2D(1e-8, 0), new Point2D(2e-8, 0)], true);
 
   expect(path.commands).toEqual([]);
 });
@@ -293,15 +261,7 @@ test("addCatmullRomSpline returns early when a tiny closed contour collapses dur
 test("addCatmullRomSpline stays finite when every control point is identical", () => {
   const path = new RecordingPath();
 
-  addCatmullRomSpline(
-    path,
-    [
-      { x: 1, y: 1 },
-      { x: 1, y: 1 },
-      { x: 1, y: 1 },
-    ],
-    false,
-  );
+  addCatmullRomSpline(path, [new Point2D(1, 1), new Point2D(1, 1), new Point2D(1, 1)], false);
 
   expect(path.commands[0]).toEqual({ type: "moveTo", x: 1, y: 1 });
   for (const command of path.commands) {
@@ -319,12 +279,7 @@ test("addCatmullRomSpline stays finite with near-zero contour segments", () => {
 
   addCatmullRomSpline(
     path,
-    [
-      { x: 0, y: 0 },
-      { x: 1e-6, y: 0 },
-      { x: 3e-6, y: 0 },
-      { x: 3e-6, y: 0 },
-    ],
+    [new Point2D(0, 0), new Point2D(1e-6, 0), new Point2D(3e-6, 0), new Point2D(3e-6, 0)],
     false,
   );
 
@@ -345,11 +300,11 @@ test("addCatmullRomSpline keeps sampled coordinates finite on uneven closed cont
   addCatmullRomSpline(
     path,
     [
-      { x: 0, y: 0 },
-      { x: 8, y: 0 },
-      { x: 8.2, y: 0.1 },
-      { x: 4, y: 5 },
-      { x: 0.1, y: 4.9 },
+      new Point2D(0, 0),
+      new Point2D(8, 0),
+      new Point2D(8.2, 0.1),
+      new Point2D(4, 5),
+      new Point2D(0.1, 4.9),
     ],
     true,
   );

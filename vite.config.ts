@@ -10,9 +10,15 @@ export default defineConfig({
     sortTailwindcss: {},
   },
   lint: {
-    categories: { correctness: "error" },
+    categories: { correctness: "error", restriction: "error" },
     options: { typeAware: true, typeCheck: true },
     plugins: ["vitest"],
+    rules: {
+      "no-use-before-define": "off",
+      "no-plusplus": "off",
+      "no-bitwise": "off",
+      "no-undefined": "off",
+    },
   },
   plugins: [tailwindcss()],
 });
