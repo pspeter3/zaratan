@@ -5,7 +5,7 @@ import { createNoise2D } from "simplex-noise";
 import { DualMesh } from "./dual-mesh";
 import { addCatmullRomIsolines, addIsolines, contourLevels } from "./isolines";
 import { poisson } from "./poisson";
-import { pointIds, pointX, pointY, type PointBuffer, type PointId } from "./utils/point-buffer";
+import { pointIds, pointX, pointY, type PointBufferLike, type PointId } from "./utils/point-buffer";
 import { createRandom } from "./utils/random";
 
 export interface OffscreenInitMessage {
@@ -110,7 +110,7 @@ function reset(ctx: OffscreenCanvasRenderingContext2D): void {
   ctx.lineCap = "round";
 }
 
-function addSegment(path: Path2D, buffer: PointBuffer, source: PointId, target: PointId): void {
+function addSegment(path: Path2D, buffer: PointBufferLike, source: PointId, target: PointId): void {
   path.moveTo(pointX(buffer, source), pointY(buffer, source));
   path.lineTo(pointX(buffer, target), pointY(buffer, target));
 }

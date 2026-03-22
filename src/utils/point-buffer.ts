@@ -1,7 +1,7 @@
 import type { Brand } from "./brand";
 
 /**
- * Branded index for a logical point stored in a {@link PointBuffer}.
+ * Branded index for a logical point stored in a {@link PointBufferLike}.
  */
 export type PointId = Brand<number, "PointId">;
 
@@ -10,7 +10,7 @@ export type PointId = Brand<number, "PointId">;
  *
  * Callers are expected to provide an even-length buffer.
  */
-export type PointBuffer = ArrayLike<number>;
+export type PointBufferLike = ArrayLike<number>;
 
 /** Number of scalar entries used for a single point (`x` and `y`). */
 const STRIDE = 2;
@@ -18,7 +18,7 @@ const STRIDE = 2;
 /**
  * Returns the number of logical points in an interleaved coordinate buffer.
  */
-export function pointCount(buffer: PointBuffer): number {
+export function pointCount(buffer: PointBufferLike): number {
   return buffer.length / STRIDE;
 }
 
@@ -27,7 +27,7 @@ export function pointCount(buffer: PointBuffer): number {
  *
  * Ids are zero-based and map directly to `STRIDE`-sized slots in the buffer.
  */
-export function* pointIds(buffer: PointBuffer): Generator<PointId> {
+export function* pointIds(buffer: PointBufferLike): Generator<PointId> {
   const count = pointCount(buffer);
   for (let i = 0; i < count; i++) {
     yield i as PointId;
@@ -40,7 +40,7 @@ export function* pointIds(buffer: PointBuffer): Generator<PointId> {
  * @remarks
  * This helper does not perform bounds checks on `id`.
  */
-export function pointX(buffer: PointBuffer, id: PointId): number {
+export function pointX(buffer: PointBufferLike, id: PointId): number {
   return buffer[STRIDE * id];
 }
 
@@ -50,6 +50,6 @@ export function pointX(buffer: PointBuffer, id: PointId): number {
  * @remarks
  * This helper does not perform bounds checks on `id`.
  */
-export function pointY(buffer: PointBuffer, id: PointId): number {
+export function pointY(buffer: PointBufferLike, id: PointId): number {
   return buffer[STRIDE * id + 1];
 }

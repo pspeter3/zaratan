@@ -1,6 +1,6 @@
 import { DualMesh } from "./dual-mesh";
 import type { Point2DRecord } from "./utils/geometry";
-import { pointIds, pointX, pointY, type PointBuffer, type PointId } from "./utils/point-buffer";
+import { pointIds, pointX, pointY, type PointBufferLike, type PointId } from "./utils/point-buffer";
 
 export interface PathBuilder {
   moveTo(x: number, y: number): void;
@@ -27,7 +27,7 @@ const SPLINE_SEGMENT_PIXELS = 12;
 const PARAMETER_EPSILON = 1e-6;
 
 export function contourLevels(
-  buffer: PointBuffer,
+  buffer: PointBufferLike,
   heightmap: Float64Array,
   count: number,
   width: number,
@@ -191,7 +191,7 @@ function contourSegments(mesh: DualMesh, heightmap: Float64Array, level: number)
 }
 
 function contourSegment(
-  buffer: PointBuffer,
+  buffer: PointBufferLike,
   sourceA: PointId,
   targetA: PointId,
   sourceB: PointId,
@@ -223,7 +223,7 @@ function contourSegment(
 }
 
 function contourPoint(
-  buffer: PointBuffer,
+  buffer: PointBufferLike,
   source: PointId,
   target: PointId,
   sourceHeight: number,
@@ -248,7 +248,7 @@ function edgeKey(source: PointId, target: PointId): string {
 }
 
 function interpolateEdge(
-  buffer: PointBuffer,
+  buffer: PointBufferLike,
   source: PointId,
   target: PointId,
   sourceHeight: number,

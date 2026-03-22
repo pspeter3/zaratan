@@ -1,7 +1,7 @@
 import Delaunator from "delaunator";
 
 import type { Brand } from "./utils/brand";
-import { pointX, pointY, type PointBuffer, type PointId } from "./utils/point-buffer";
+import { pointX, pointY, type PointBufferLike, type PointId } from "./utils/point-buffer";
 
 export type TriangleId = Brand<PointId, "TriangleId">;
 export type EdgeId = Brand<number, "EdgeId">;
@@ -30,8 +30,8 @@ export class DualMesh {
     yield (firstEdge + 2) as EdgeId;
   }
 
-  readonly points: PointBuffer;
-  readonly corners: PointBuffer;
+  readonly points: PointBufferLike;
+  readonly corners: PointBufferLike;
 
   #delaunator: Delaunator<Float64Array>;
 
