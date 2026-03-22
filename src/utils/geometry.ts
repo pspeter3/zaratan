@@ -29,3 +29,21 @@ export interface Bounds2DRecord {
 }
 
 export type Bounds2DTuple = readonly [min: Point2DTuple, max: Point2DTuple];
+
+export class Bounds2D {
+  static fromRecord({ min, max }: Bounds2DRecord): Bounds2D {
+    return new Bounds2D(Point2D.fromRecord(min), Point2D.fromRecord(max));
+  }
+
+  static fromTuple([min, max]: Bounds2DTuple): Bounds2D {
+    return new Bounds2D(Point2D.fromTuple(min), Point2D.fromTuple(max));
+  }
+
+  readonly min: Point2D;
+  readonly max: Point2D;
+
+  constructor(min: Point2D, max: Point2D) {
+    this.min = min;
+    this.max = max;
+  }
+}
