@@ -1,4 +1,4 @@
-import { mix } from "./math";
+import { clamp, mix } from "./math";
 
 /**
  * A read-only object representation of a 2D point.
@@ -81,6 +81,16 @@ export class Point2D implements Point2DRecord {
   mix({ x, y }: Point2DRecord, t: number): Point2D {
     return mixPoints(this.x, this.y, x, y, t);
   }
+
+  /**
+   * Creates a segment from this point to another point.
+   *
+   * @param other - The segment endpoint opposite this point.
+   * @returns A new `Segment2D` from this point to `other`.
+   */
+  segmentTo(other: Point2D): Segment2D {
+    return new Segment2D(this, other);
+  }
 }
 
 /**
@@ -132,6 +142,125 @@ export class Bounds2D {
   constructor(min: Point2D, max: Point2D) {
     this.min = min;
     this.max = max;
+  }
+}
+
+/**
+ * A read-only object representation of a 2D segment.
+ */
+export interface Segment2DRecord {
+  readonly source: Point2DRecord;
+  readonly target: Point2DRecord;
+}
+
+/**
+ * A tuple representation of a 2D segment in `[[sourceX, sourceY], [targetX, targetY]]` order.
+ */
+export type Segement2DTuple = readonly [source: Point2DTuple, target: Point2DTuple];
+
+/**
+ * An immutable line segment between two 2D points.
+ */
+export class Segment2D {
+  /**
+   * Creates a segment from an object representation.
+   *
+   * @param segment - The source segment record.
+   * @returns A new `Segment2D` instance.
+   */
+  static fromRecord({ source, target }: Segment2DRecord): Segment2D {
+    return new Segment2D(Point2D.fromRecord(source), Point2D.fromRecord(target));
+  }
+
+  /**
+   * Creates a segment from a tuple representation.
+   *
+   * @param segment - The source segment tuple.
+   * @returns A new `Segment2D` instance.
+   */
+  static fromTuple([source, target]: Segement2DTuple): Segment2D {
+    return new Segment2D(Point2D.fromTuple(source), Point2D.fromTuple(target));
+  }
+
+  readonly source: Point2D;
+  readonly target: Point2D;
+
+  /**
+   * Creates a 2D segment from source and target points.
+   *
+   * @param source - The segment start point.
+   * @param target - The segment end point.
+   */
+  constructor(source: Point2D, target: Point2D) {
+    this.source = source;
+    this.target = target;
+  }
+
+  /**
+   * Returns the Euclidean length of the segment.
+   *
+   * @returns The distance between the source and target points.
+   */
+  get length(): number {
+    return this.source.distance(this.target);
+  }
+
+  /**
+   * Returns the squared Euclidean length of the segment.
+   *
+   * @returns The squared distance between the source and target points.
+   */
+  get lengthSquared(): number {
+    return this.source.quadrance(this.target);
+  }
+
+  /**
+   * Linearly interpolates along the segment.
+   *
+   * @param t - The interpolation factor, where `0` returns `source` and `1` returns `target`.
+   * @returns A new point on the segment's supporting line.
+   */
+  mix(t: number): Point2D {
+    return this.source.mix(this.target, t);
+  }
+
+  /**
+   * Returns the shortest Euclidean distance from the segment to a point.
+   *
+   * @param point - The point to measure against.
+   * @returns The distance from `point` to the nearest point on the segment.
+   */
+  distance(point: Point2DRecord): number {
+    return Math.sqrt(this.quadrance(point));
+  }
+
+  /**
+   * Returns the squared shortest Euclidean distance from the segment to a point.
+   *
+   * @param point - The point to measure against.
+   * @returns The squared distance from `point` to the nearest point on the segment.
+   */
+  quadrance({ x, y }: Point2DRecord): number {
+    const dx = this.target.x - this.source.x;
+    const dy = this.target.y - this.source.y;
+    const lengthSquared = this.lengthSquared;
+
+    if (lengthSquared === 0) {
+      return this.source.quadrance({ x, y });
+    }
+
+    const projection = clamp(
+      ((x - this.source.x) * dx + (y - this.source.y) * dy) / lengthSquared,
+      0,
+      1,
+    );
+
+    return quadrance(
+      x,
+      y,
+      mix(this.source.x, this.target.x, projection),
+      mix(this.source.y, this.target.y, projection),
+    );
   }
 }
 
