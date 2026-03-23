@@ -1,13 +1,18 @@
-import tailwindcss from "@tailwindcss/vite";
 import { defineConfig } from "vite-plus";
 
 export default defineConfig({
+  css: {
+    preprocessorOptions: {
+      scss: {
+        quietDeps: true,
+      },
+    },
+  },
   staged: {
     "*": "vp check --fix",
   },
   fmt: {
     sortImports: {},
-    sortTailwindcss: {},
   },
   lint: {
     categories: { correctness: "error", restriction: "error" },
@@ -21,5 +26,4 @@ export default defineConfig({
       "default-case": "off",
     },
   },
-  plugins: [tailwindcss()],
 });

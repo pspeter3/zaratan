@@ -1,0 +1,18 @@
+@use "sass:map";
+@use "@picocss/pico/scss/pico" with (
+  $theme-color: "cyan"
+);
+@use "@picocss/pico/scss/settings" as *;
+
+.layout {
+  @if map.get($breakpoints, "md") {
+    @media (min-width: map.get(map.get($breakpoints, "md"), "breakpoint")) {
+      grid-template-columns: 20rem minmax(0, 1fr);
+    }
+  }
+}
+
+#canvas,
+#copy {
+  width: 100%;
+}
