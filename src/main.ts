@@ -3,6 +3,7 @@ import type { ZaratanParams } from "./zaratan";
 
 const canvas = document.getElementById("canvas") as HTMLCanvasElement;
 const params = document.getElementById("params") as HTMLFormElement;
+const copy = document.getElementById("copy") as HTMLButtonElement;
 
 const worker = new Worker(new URL("./offscreen-worker.ts", import.meta.url), { type: "module" });
 const offscreenCanvas = canvas.transferControlToOffscreen();
@@ -11,6 +12,7 @@ worker.postMessage({ kind: "init", canvas: offscreenCanvas } satisfies InitComma
   offscreenCanvas,
 ]);
 params.addEventListener("submit", onSubmit);
+copy.addEventListener("click", onCopy);
 params.requestSubmit();
 
 function onSubmit(this: HTMLFormElement, event: SubmitEvent): void {
@@ -32,4 +34,24 @@ function parseParams(controls: HTMLFormControlsCollection): ZaratanParams {
 
 function parseControl(controls: HTMLFormControlsCollection, name: keyof ZaratanParams): number {
   return (controls.namedItem(name) as HTMLInputElement).valueAsNumber;
+}
+
+async function onCopy(): Promise<void> {
+  const mimeType = "image/png";
+  await navigator.clipboard.write([
+    new ClipboardItem({
+      [mimeType]: toBlob(mimeType),
+    }),
+  ]);
+}
+
+function toBlob(mimeType: string): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (blob === null) {
+        return reject(new Error("Could not create blob"));
+      }
+      return resolve(blob);
+    }, mimeType);
+  });
 }
