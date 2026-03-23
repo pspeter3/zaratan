@@ -78,6 +78,17 @@ describe("Bounds2D", () => {
     expect(bounds.max.y).toEqual(4);
   });
 
+  test("fromDimensions", () => {
+    const bounds = Bounds2D.fromDimensions(3, 4);
+
+    expect(bounds.min).toBeInstanceOf(Point2D);
+    expect(bounds.max).toBeInstanceOf(Point2D);
+    expect(bounds.min.x).toEqual(0);
+    expect(bounds.min.y).toEqual(0);
+    expect(bounds.max.x).toEqual(3);
+    expect(bounds.max.y).toEqual(4);
+  });
+
   test("contains returns true for interior points", () => {
     const bounds = new Bounds2D(new Point2D(1, 2), new Point2D(3, 4));
 

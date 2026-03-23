@@ -4,9 +4,42 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Zaratan</title>
+    <link rel="stylesheet" href="./src/style.scss" />
     <script type="module" src="./src/main.ts"></script>
   </head>
-  <body class="min-h-dvh bg-black">
-    <canvas id="canvas" class="mx-auto max-h-dvh max-w-dvw" role="img"></canvas>
+  <body>
+    <main class="container-fluid grid layout">
+      <section>
+        <header>
+          <hgroup>
+            <h1>Zaratan</h1>
+            <p>Procedural regional map generator</p>
+          </hgroup>
+        </header>
+        <form id="params">
+          <label>
+            Seed
+            <input name="seed" type="number" value="42" inputmode="numeric" />
+          </label>
+          <label>
+            Width
+            <input name="width" type="number" value="1024" inputmode="numeric" />
+          </label>
+          <label>
+            Height
+            <input name="height" type="number" value="1024" inputmode="numeric" />
+          </label>
+          <label>
+            Radius
+            <input name="radius" type="number" value="128" inputmode="numeric" />
+          </label>
+          <button type="submit">Render</button>
+        </form>
+        <button id="copy" class="outline secondary">Copy</button>
+      </section>
+      <section>
+        <canvas id="canvas" role="img"></canvas>
+      </section>
+    </main>
   </body>
 </html>

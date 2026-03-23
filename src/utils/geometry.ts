@@ -136,6 +136,17 @@ export class Bounds2D {
     return new Bounds2D(Point2D.fromTuple(min), Point2D.fromTuple(max));
   }
 
+  /**
+   * Creates bounds from the origin to the provided width and height.
+   *
+   * @param width - The maximum x-coordinate.
+   * @param height - The maximum y-coordinate.
+   * @returns A new `Bounds2D` instance spanning from `(0, 0)`.
+   */
+  static fromDimensions(width: number, height: number): Bounds2D {
+    return new Bounds2D(new Point2D(0, 0), new Point2D(width, height));
+  }
+
   /** The minimum or lower-left corner. */
   readonly min: Point2D;
   /** The maximum or upper-right corner. */
